@@ -1,16 +1,29 @@
-#' Hidden genome Bayesian hierarchical classifier
+#' Hidden genome sparse multinomial logistic classifier (smlc)
+#' @param X data design matrix with observations across rows and predictors across
+#' columns. For a typical hidden genome classifier each row represents a tumor and
+#' the columns represent (possibly normalized by some functions of
+#' the total mutation burden in tumors) binary 1-0 presence/absence indicators
+#' of raw variants, counts of mutations at specific genes and counts of mutations
+#' corresponding to specific mutation signatures etc.
+#' @param Y character vector or factor denoting the cancer type of tumors whose
+#' mutation profiles are listed across the rows of \code{X}.
+#' @param grouped logical. Use group-lasso penalty instead of the ordinary lasso
+#' penalty? Defaults to TRUE.
+#' @param ... additional arguments passed to \code{cv.glmnet}.
 #'
-#' @description  Light wrapper around cv.glmnet with  family = "multinomia",
-#' and type.mutlinomial = "grouped" if grouped = TRUE.
-#' Returns the glmnet fitted object together with X, Y and estiamted
-#' intercept alpha and regression coefficients beta
+#' @note   The function is a light wrapper around cv.glmnet with
+#' \code{family = "multinomial"}, and \code{type.multinomial = "grouped"} if
+#' \code{grouped} = TRUE.
+#'
+#'  @return
+#' Returns a cv.glmnet fitted object together with X, Y and estimated
+#' intercept vector alpha and regression coefficients matrix beta.
+#'
 #' @export
 fit_smlc <- function(X,  Y,
                      grouped = TRUE,
                      alpha = 1,
-                     no_penalty_vars = NULL,
                      ...) {
-  `%>%` <- magrittr::`%>%`
   X <- Matrix::Matrix(X, sparse = TRUE)
   type.multinomial <- ifelse(grouped,
                              "grouped",
@@ -19,14 +32,6 @@ fit_smlc <- function(X,  Y,
   dots$alpha <- NULL
   dots$type.multinomial <- NULL
 
-  # if (!is.null(no_penalty_vars)) {
-  #   penalty_factor <- rep(1, ncol(X))
-  #   names(penalty_factor) <- colnames(X)
-  #   penalty_factor[no_penalty_vars] <- 0
-  #   dots$penalty.factor <- penalty_factor
-  # }
-
-  if (any(dots$penalty.factor == 0)) browser()
 
   logis <- do.call(
     glmnet::cv.glmnet,
@@ -56,7 +61,7 @@ fit_smlc <- function(X,  Y,
 
 
 
-#' Lght wrapper around randomForest
+#' Light wrapper around randomForest
 fit_rfc <- function(X, Y, ...) {
   randomForest::randomForest(
     x = as.matrix(X),
@@ -66,9 +71,30 @@ fit_rfc <- function(X, Y, ...) {
 }
 
 
-#' Prediction based on sparse multilevel multinomial
+#' Prediction based on the hidden genome sparse multinomial
 #' logistic classifier
-#' @description can handles unseen variants as predictors.
+#'
+#' @param  Xnew test data design (or meta-design) matrix (observations
+#' across rows and variables predictors/features across columns)
+#' for which predictions are to be made from a fitted model. For a typical hidden
+#' genome classifier this will be a matrix whose rows correspond to the test set
+#' tumors, and columns correspond to (normalized by some functions of
+#' the total mutation burdens in tumors) binary 1-0 presence/absence of
+#' raw variants, counts of mutations at specific genes and counts of mutations
+#' corresponding to specific mutation signatures etc.
+#' @param fit fitted hidden genome classifier, an output of fit_smlc.
+#' @param Ynew the actual cancer categories for the test samples whose
+#'
+#' @note  Predictors in \code{Xnew} that are not present in the
+#' training set design matrix (stored in \code{fit}) are dropped, and predictors
+#' not included in \code{Xnew} but present in training set design matrix are
+#' all assumed to have zero values. This is convenient for a typical
+#' hidden genome classifier where most predictors are (some normalized versions
+#' of) counts (e.g. for gene and mutation signatures) or
+#' binary presence/absence indicators (e.g., for raw variants) so that a zero
+#' predictor value essentially indicates some form of "absence".
+#' However, care must be taken for predictors whose 0 values
+#' do not indicate absence.
 #'
 #' @export
 predict_smlc <- function(Xnew,

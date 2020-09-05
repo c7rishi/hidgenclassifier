@@ -2,10 +2,10 @@
 % Please edit documentation in R/fit_sml.R
 \name{fit_rfc}
 \alias{fit_rfc}
-\title{Lght wrapper around randomForest}
+\title{Light wrapper around randomForest}
 \usage{
 fit_rfc(X, Y, ...)
 }
 \description{
-Lght wrapper around randomForest
+Light wrapper around randomForest
 }

@@ -2,11 +2,38 @@
 % Please edit documentation in R/fit_sml.R
 \name{predict_smlc}
 \alias{predict_smlc}
-\title{Prediction based on sparse multilevel multinomial
-logisitic classifier}
+\title{Prediction based on the hidden genome sparse multinomial
+logistic classifier}
 \usage{
 predict_smlc(Xnew, fit, Ynew = NULL, return_lin_pred = FALSE, ...)
 }
+\arguments{
+\item{Xnew}{test data design (or meta-design) matrix (observations
+across rows and variables predictors/features across columns)
+for which predictions are to be made from a fitted model. For a typical hidden
+genome classifier this will be a matrix whose rows correspond to the test set
+tumors, and columns correspond to (normalized by some functions of
+the total mutation burdens in tumors) binary 1-0 presence/absence of
+raw variants, counts of mutations at specific genes and counts of mutations
+corresponding to specific mutation signatures etc.}
+
+\item{fit}{fitted hidden genome classifier, an output of fit_smlc.}
+
+\item{Ynew}{the actual cancer categories for the test samples whose}
+}
 \description{
-can handles unseen variants as predictors.
+Prediction based on the hidden genome sparse multinomial
+logistic classifier
+}
+\note{
+Predictors in \code{Xnew} that are not present in the
+training set design matrix (stored in \code{fit}) are dropped, and predictors
+not included in \code{Xnew} but present in training set design matrix are
+all assumed to have zero values. This is convenient for a typical
+hidden genome classifier where most predictors are (some normalized versions
+of) counts (e.g. for gene and mutation signatures) or
+binary presence/absence indicators (e.g., for raw variants) so that a zero
+predictor value essentially indicates some form of "absence".
+However, care must be taken for predictors whose 0 values
+do not indicate absence.
 }

@@ -2,13 +2,35 @@
 % Please edit documentation in R/fit_sml.R
 \name{fit_smlc}
 \alias{fit_smlc}
-\title{Hidden genome Bayesian hierarchical classifier}
+\title{Hidden genome sparse multinomial logistic classifier (smlc)}
 \usage{
-fit_smlc(X, Y, grouped = TRUE, alpha = 1, no_penalty_vars = NULL, ...)
+fit_smlc(X, Y, grouped = TRUE, alpha = 1, ...)
+}
+\arguments{
+\item{X}{data design matrix with observations across rows and predictors across
+columns. For a typical hidden genome classifier each row represents a tumor and
+the columns represent (possibly normalized by some functions of
+the total mutation burden in tumors) binary 1-0 presence/absence indicators
+of raw variants, counts of mutations at specific genes and counts of mutations
+corresponding to specific mutation signatures etc.}
+
+\item{Y}{character vector or factor denoting the cancer type of tumors whose
+mutation profiles are listed across the rows of \code{X}.}
+
+\item{grouped}{logical. Use group-lasso penalty instead of the ordinary lasso
+penalty? Defaults to TRUE.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \description{
-Light wrapper around cv.glmnet with  family = "multinomia",
-and type.mutlinomial = "grouped" if grouped = TRUE.
-Returns the glmnet fitted object together with X, Y and estiamted
-intercept alpha and regression coefficients beta
+Hidden genome sparse multinomial logistic classifier (smlc)
+}
+\note{
+The function is a light wrapper around cv.glmnet with
+\code{family = "multinomial"}, and \code{type.multinomial = "grouped"} if
+\code{grouped} = TRUE.
+
+@return
+Returns a cv.glmnet fitted object together with X, Y and estimated
+intercept vector alpha and regression coefficients matrix beta.
 }
