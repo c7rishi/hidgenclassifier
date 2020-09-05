@@ -67,10 +67,10 @@ fit_rfc <- function(X, Y, ...) {
 
 
 #' Prediction based on sparse multilevel multinomial
-#' logisitic classifier
+#' logistic classifier
 #' @description can handles unseen variants as predictors.
 #'
-#'@ export
+#' @export
 predict_smlc <- function(Xnew,
                          fit,
                          Ynew = NULL,

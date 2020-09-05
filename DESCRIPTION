@@ -1,6 +1,6 @@
 Package: hidgenclassifier
 Title: Functions for Bayesian hierarchical hidden genome classifier
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     person(given = "Saptarshi",
            family = "Chakraborty",
@@ -8,12 +8,11 @@ Authors@R:
            email = "chakra.saptarshi@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: Key functions for Bayesian hidden genome classifiers. Includes functions for fitting, predicting and crossvalidation experiments.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Imports: 
     magrittr,
     data.table,
@@ -24,5 +23,4 @@ Imports:
     caret,
     pROC
 LinkingTo: 
-    Rcpp,
-    RcppArmadillo
+    Rcpp

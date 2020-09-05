@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 Cpp_calc_minfo <- function(prob_mat, wt_vec, normalized = 1L) {
-    .Call('_hidgenclassifier_Cpp_calc_minfo', PACKAGE = 'hidgenclassifier', prob_mat, wt_vec, normalized)
+    .Call(`_hidgenclassifier_Cpp_calc_minfo`, prob_mat, wt_vec, normalized)
 }
 
