@@ -13,6 +13,9 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Depends: 
+    R (>= 3.3.0)
+biocViews:    
 Imports: 
     magrittr,
     data.table,
@@ -21,6 +24,8 @@ Imports:
     randomForest,
     Rcpp,
     caret,
-    pROC
+    pROC,
+    SomaticSignatures,
+    BSgenome.Hsapiens.UCSC.hg19
 LinkingTo: 
     Rcpp

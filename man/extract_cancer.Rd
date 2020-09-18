@@ -4,14 +4,14 @@
 \alias{extract_cancer}
 \title{Extract cancer labels}
 \usage{
-extract_cancer(dat)
+extract_cancer(maf)
 }
 \description{
 Extract cancer labels
 }
 \details{
 INPUT:
-dat: mutation annotation file (maf) with colum names
+maf: mutation annotation file (maf) with colum names
 g = gene, v = variants, c = cancer type,
 and p = patient (tumor) id.
 

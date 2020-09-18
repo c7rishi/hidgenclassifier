@@ -76,7 +76,7 @@ do_cv_multiclass_allmodels <- function(
 
     # browser()
 
-    v_mi <- select_v_nmi(dt_train, v_rank_thresh, normalize_mi = mi_normalized)
+    v_mi <- variant_screen_mi(dt_train, v_rank_thresh, normalize_mi = mi_normalized)
 
     v_train_list_hier <- v_mi$probs_mi[nmi_rank <= v_rank_thresh]$v
     v_train_list_recorded <- v_mi$probs_mi[nmi_rank <= v_rank_thresh_full]$v
@@ -432,7 +432,7 @@ do_cv_multiclass_allmodels <- function(
 #
 #     cat("\n\nscreening v based on NMI ranking..")
 #
-#     v_mi <- select_v_nmi(dt_train, 100)
+#     v_mi <- variant_screen_mi(dt_train, 100)
 #
 #
 #     cat("\n\nfinding training design matrix for v..")
@@ -638,7 +638,7 @@ do_cv_multiclass_allmodels <- function(
 #     ) %>%
 #       lapply(
 #         function(this_dt)
-#           select_v_nmi(this_dt, v_rank_thresh)
+#           variant_screen_mi(this_dt, v_rank_thresh)
 #       )
 #
 #
@@ -1084,7 +1084,7 @@ do_cv_multiclass_allmodels <- function(
 #
 #     cat("\n\nscreening v based on NMI ranking..")
 #
-#     v_mi <- select_v_nmi(dt_train, 100)
+#     v_mi <- variant_screen_mi(dt_train, 100)
 #
 #     cat("\n\nfinding training design matrices..")
 #     # for multilevel model
