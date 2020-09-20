@@ -31,6 +31,7 @@ The function is a light wrapper around cv.glmnet with
 \code{grouped} = TRUE.
 
 @return
-Returns a cv.glmnet fitted object together with X, Y and estimated
+Returns a list containing the cv.glmnet fitted object,
+the original X and Y and the estimated
 intercept vector alpha and regression coefficients matrix beta.
 }

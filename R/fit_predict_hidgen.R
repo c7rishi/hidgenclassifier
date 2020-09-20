@@ -16,7 +16,8 @@
 #' \code{grouped} = TRUE.
 #'
 #'  @return
-#' Returns a cv.glmnet fitted object together with X, Y and estimated
+#' Returns a list containing the cv.glmnet fitted object,
+#' the original X and Y and the estimated
 #' intercept vector alpha and regression coefficients matrix beta.
 #'
 #' @export
@@ -61,7 +62,10 @@ fit_smlc <- function(X,  Y,
 
 
 
-#' Light wrapper around randomForest
+#' Light wrapper around randomForest to use in hidden
+#' genome classification
+#' @inheritParams fit_smlc
+#' @export
 fit_rfc <- function(X, Y, ...) {
   randomForest::randomForest(
     x = as.matrix(X),
@@ -83,7 +87,7 @@ fit_rfc <- function(X, Y, ...) {
 #' raw variants, counts of mutations at specific genes and counts of mutations
 #' corresponding to specific mutation signatures etc.
 #' @param fit fitted hidden genome classifier, an output of fit_smlc.
-#' @param Ynew the actual cancer categories for the test samples whose
+#' @param Ynew the actual cancer categories for the test samples.
 #'
 #' @note  Predictors in \code{Xnew} that are not present in the
 #' training set design matrix (stored in \code{fit}) are dropped, and predictors

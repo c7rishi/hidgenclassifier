@@ -26,6 +26,8 @@ Imports:
     caret,
     pROC,
     SomaticSignatures,
+    VariantAnnotation,
+    IRanges,
     BSgenome.Hsapiens.UCSC.hg19
 LinkingTo: 
     Rcpp

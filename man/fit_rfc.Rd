@@ -2,10 +2,25 @@
 % Please edit documentation in R/fit_predict_hidgen.R
 \name{fit_rfc}
 \alias{fit_rfc}
-\title{Light wrapper around randomForest}
+\title{Light wrapper around randomForest to use in hidden
+genome classification}
 \usage{
 fit_rfc(X, Y, ...)
 }
+\arguments{
+\item{X}{data design matrix with observations across rows and predictors across
+columns. For a typical hidden genome classifier each row represents a tumor and
+the columns represent (possibly normalized by some functions of
+the total mutation burden in tumors) binary 1-0 presence/absence indicators
+of raw variants, counts of mutations at specific genes and counts of mutations
+corresponding to specific mutation signatures etc.}
+
+\item{Y}{character vector or factor denoting the cancer type of tumors whose
+mutation profiles are listed across the rows of \code{X}.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
+}
 \description{
-Light wrapper around randomForest
+Light wrapper around randomForest to use in hidden
+genome classification
 }

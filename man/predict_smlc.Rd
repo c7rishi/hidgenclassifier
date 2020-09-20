@@ -19,7 +19,7 @@ corresponding to specific mutation signatures etc.}
 
 \item{fit}{fitted hidden genome classifier, an output of fit_smlc.}
 
-\item{Ynew}{the actual cancer categories for the test samples whose}
+\item{Ynew}{the actual cancer categories for the test samples.}
 }
 \description{
 Prediction based on the hidden genome sparse multinomial
