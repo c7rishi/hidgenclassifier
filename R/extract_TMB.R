@@ -14,7 +14,7 @@ extract_tmb <- function(
   ...
 ) {
 
-  dt <- data.table::as.data.table(
+  dt <- as.data.table(
     maf
   )[,
     c(sample_id_col, variant_col),
@@ -26,13 +26,13 @@ extract_tmb <- function(
     old = c(sample_id_col, variant_col),
     new = c("p", "v")
   )
-  data.table::setkey(dt, p)
+  setkey(dt, p)
 
   dt_tmb <- dt[
     ,
-    (nv = length(unique(v))),
+    .(nv = length(unique(v))),
     by = p
   ]
 
-  setNames(dt_tmp$nv, dt_tmp$p)
+  setNames(dt_tmb$nv, dt_tmb$p)
 }
