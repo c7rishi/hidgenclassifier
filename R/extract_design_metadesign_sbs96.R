@@ -29,7 +29,9 @@
 #' {proxy} and {GGally} packages, which overwrites defaults S3 methods
 #' of a few functions from {ggplot2} and {registry}.
 #'
-#'
+#' @return
+#' An n_tumor x 96 sparseMatrix, with (i, j)th entry providing the total
+#' number of variants n tumor i associated with j-th SBS-96 category.
 #'
 #' @author Ronglai Shen, Saptarshi Chakraborty
 #' @export

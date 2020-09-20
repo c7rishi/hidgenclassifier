@@ -33,6 +33,10 @@ NOTE: uniqueness of rows of maf is assumed.}
 SBS-96 contexts for all mutations in \code{maf} be returned as an
 attribute named \code{VRanges} of the output? Defaults to FALSE.}
 }
+\value{
+An n_tumor x 96 sparseMatrix, with (i, j)th entry providing the total
+number of variants n tumor i associated with j-th SBS-96 category.
+}
 \description{
 Extract Design-Metadesign (XU) matrix for SBS-96
 meta-feature categories from a maf file
