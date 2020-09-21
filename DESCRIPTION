@@ -17,12 +17,14 @@ Depends:
     R (>= 3.3.0)
 biocViews:    
 Imports: 
+    Rcpp,
     magrittr,
     data.table,
     Matrix,
     glmnet,
     randomForest,
-    Rcpp,
+    ranger,
+    e1071,
     caret,
     pROC,
     SomaticSignatures,

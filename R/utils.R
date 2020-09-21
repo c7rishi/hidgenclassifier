@@ -1,5 +1,7 @@
 # expand a sparse matrix by filling zeros, given rows & colnames
-fill_sparsemat_zero <- function(mat, rownames, colnames) {
+fill_sparsemat_zero <- function(
+  mat, rownames, colnames
+) {
   # mat_sparse <- Matrix::Matrix(mat, sparse = TRUE)
   zeromat <- Matrix(
     data = 0,
