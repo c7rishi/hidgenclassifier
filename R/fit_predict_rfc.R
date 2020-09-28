@@ -60,10 +60,15 @@ predict_rfc <- function(fit,
     Xold_names <- rownames(fit_rf$importance)
   }
 
-  Xnew_adj <- adjust_Xnew(Xnew, Xold_names)
+  # Xnew_adj <- adjust_Xnew(Xnew, Xold_names)
+  Xnew_adj <- Xnew %>%
+    fill_sparsemat_zero(
+      rownames = rownames(.),
+      colnames = Xold_names
+    )
 
   if (fit$backend == "ranger") {
-    predict_obj <- ranger::predict.ranger(
+    predict_obj <- predict(
       fit_rf,
       data = Xnew_adj,
       type = "response"

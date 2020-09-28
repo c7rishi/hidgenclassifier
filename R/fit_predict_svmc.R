@@ -42,9 +42,12 @@ predict_svmc <- function(Xnew,
   fit_svm <- fit$fit$best.model
 
   Xold_names <- colnames(fit$X)
-  Xnew_adj <- adjust_Xnew(Xnew, Xold_names)
+  Xnew_adj <- Xnew %>%
+    fill_sparsemat_zero(
+      rownames = rownames(.),
+      colnames = Xold_names
+    )
 
-  # browser()
   predict_obj <- predict(
     fit_svm,
     newdata = Xnew_adj,

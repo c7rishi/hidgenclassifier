@@ -68,79 +68,131 @@ variant_screen_mi <- function(
   thresh_freq_screen = 1/length(unique(maf[[sample_id_col]])),
   ...
 ) {
-  dt <- as.data.table(
-    maf
-  )[,
-    c(variant_col, cancer_col, sample_id_col),
-    with = FALSE
-  ]
 
-  setnames(
-    dt,
-    old = c(variant_col, cancer_col, sample_id_col),
-    new = c("vv", "c", "p")
-  )
-  setkey(dt, vv, c)
+  dots <- list(...)
 
-  # number of tumors per cancer site
-  np_c <- dt[
-    ,
-    .(np = length(unique(p))),
-    by = c
-  ][,
-    prop := ifelse(
-      equal_cancer_prob_mi,
-      1/.N,
-      np/sum(np)
+  if (!is.null(dots$design_mat) &
+      !is.null(dots$cancer_cat)) {
+
+
+    # EXPERIMENTAL, uses a pre-computed design matrix
+
+    Xmat <- Matrix(dots$design_mat, sparse = TRUE)
+
+    dt_p_c <- data.table(
+      p = names(dots$cancer_cat),
+      c = unname(dots$cancer_cat)
     )
-  ]
 
-  # add cancer specific-sample size column
-  # per cancer site to the maf
-  dt[,
-     np := length(unique(p)),
-     by = c
-  ]
-
-  if (do_freq_screen) {
-    np_full <- sum(np_c$np)
-    v_rf_marg <- dt[
+    # number of tumors per cancer site
+    np_c <- dt_p_c[
       ,
-      .(v_rf = length(unique(p))/np_full),
-      by = vv
+      .(np = length(unique(p))),
+      by = c
+    ][,
+      prop := ifelse(
+        equal_cancer_prob_mi,
+        1/.N,
+        np/sum(np)
+      )
     ]
 
-    v_keep <- v_rf_marg[v_rf > thresh_freq_screen]$vv
+    v_rf_c_mi <- dt_p_c[
+      ,
+      {
+        as.list(Matrix::colMeans(Xmat[.SD$p, ]))
+      },
+      by = c
+    ] %>%
+      melt(
+        id.vars = "c",
+        variable.name = "vv",
+        value.name = "v_rf"
+      ) %>%
+      dcast(
+        vv ~ c,
+        fill = 0,
+        value.var = "v_rf"
+      ) %>%
+      .[, vv := as.character(vv)]
 
-    dt <- dt[vv %in% v_keep]
-  }
 
+  } else {
 
-  v_rf_c_mi <- dt[
-    # compute relative frequencies of
-    # variants by cancer
-    # then dcast
-    ,
-    {
-      freq <- length(unique(p))
-      .(v_rf = freq/np[1],
-        v_f = freq)
-    },
-    by = .(vv, c)
-  ][,
-    is_singleton := (max(v_f) == 1),
-    by = vv
-  ][
-    is_singleton == FALSE
-  ] %>%
-    dcast(
-      vv ~ c, fill = 0,
-      value.var = "v_rf"
+    dt <- as.data.table(
+      maf
+    )[,
+      c(variant_col, cancer_col, sample_id_col),
+      with = FALSE
+    ]
+
+    setnames(
+      dt,
+      old = c(variant_col, cancer_col, sample_id_col),
+      new = c("vv", "c", "p")
     )
+    setkey(dt, vv, c)
+
+    # number of tumors per cancer site
+    np_c <- dt[
+      ,
+      .(np = length(unique(p))),
+      by = c
+    ][,
+      prop := ifelse(
+        equal_cancer_prob_mi,
+        1/.N,
+        np/sum(np)
+      )
+    ]
+
+    # add cancer specific-sample size column
+    # per cancer site to the maf
+    dt[,
+       np := length(unique(p)),
+       by = c
+    ]
+
+    if (do_freq_screen) {
+      np_full <- sum(np_c$np)
+      v_rf_marg <- dt[
+        ,
+        .(v_rf = length(unique(p))/np_full),
+        by = vv
+      ]
+
+      v_keep <- v_rf_marg[v_rf > thresh_freq_screen]$vv
+
+      dt <- dt[vv %in% v_keep]
+    }
+
+
+    v_rf_c_mi <- dt[
+      # compute relative frequencies of
+      # variants by cancer
+      # then dcast
+      ,
+      {
+        freq <- length(unique(p))
+        .(v_rf = freq/np[1],
+          v_f = freq)
+      },
+      by = .(vv, c)
+    ][,
+      is_singleton := (max(v_f) == 1),
+      by = vv
+    ][
+      is_singleton == FALSE
+    ] %>%
+      dcast(
+        vv ~ c, fill = 0,
+        value.var = "v_rf"
+      )
+
+  }
 
   cancer_prob <- np_c$prop
   names(cancer_prob) <- np_c$c
-
 
   # add mi values for the variants
   # along with its (descending) ranks
@@ -156,16 +208,17 @@ variant_screen_mi <- function(
     mi_rank := rank(-mi)
   ]
 
-  out_mat <- v_rf_c_mi[mi_rank <= mi_rank_thresh]
 
   # arrange by descending mi
   setorder(v_rf_c_mi, -mi)
   setnames(v_rf_c_mi, "vv", variant_col)
 
-  out <- v_rf_c_mi[[variant_col]]
+
+  out_mat <- v_rf_c_mi[mi_rank <= mi_rank_thresh]
+  out <- as.character(out_mat[[variant_col]])
 
   if (return_prob_mi) {
-    attr(out, "prob_mi") <- v_rf_c_mi
+    attr(out, "prob_mi") <- out_mat
   }
 
   out
