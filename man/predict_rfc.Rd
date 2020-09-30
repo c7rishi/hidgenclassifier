@@ -6,6 +6,10 @@
 \usage{
 predict_rfc(fit, Xnew, Ynew = NULL, ...)
 }
+\arguments{
+\item{fit}{Fitted random forest hidden genome classifier (output of
+fit_rfc).}
+}
 \description{
 prediction based on hidden genome random forest classifier
 }

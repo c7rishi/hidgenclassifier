@@ -8,10 +8,10 @@
 fit_svmc <- function(X, Y, ...) {
   dots <- list(...)
   if (is.null(dots$gamma)) {
-    gamma <- exp(-1:3)
+    gamma <- 10^(-4:3)
   }
   if (is.null(dots$cost)) {
-    dots$cost <- exp(-1:3)
+    dots$cost <- 10^(-4:3)
   }
 
   fit <- list(

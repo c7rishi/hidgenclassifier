@@ -5,6 +5,7 @@
 #' @importFrom Matrix Matrix crossprod tcrossprod t
 #' @import stats
 #' @import methods
+#' @import keras
 ## usethis namespace: end
 NULL
 

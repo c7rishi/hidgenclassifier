@@ -47,6 +47,8 @@ fit_rfc <- function(X, Y, backend = "ranger", ...) {
 
 
 #' prediction based on hidden genome random forest classifier
+#' @param fit Fitted random forest hidden genome classifier (output of
+#' fit_rfc).
 #' @export
 predict_rfc <- function(fit,
                         Xnew,
