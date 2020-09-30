@@ -3,6 +3,8 @@ Title: Functions for Bayesian hierarchical hidden genome classifier
 Version: 0.1.0
 Author: Saptarshi Chakraborty,
         Zoe Guan,
+        Axel Martin,
+        Colin B. Begg,
         Ronglai Shen
 Maintainer: Saptarshi Chakraborty <chakra.saptarshi@gmail.com>
 Description: 
