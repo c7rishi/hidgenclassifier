@@ -10,6 +10,7 @@ odds_ratio_smlc(
   type = "one-vs-rest",
   scale = TRUE,
   log = TRUE,
+  predictor_subset = NULL,
   baseline_category = NULL,
   ...
 )

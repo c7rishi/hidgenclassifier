@@ -28,6 +28,7 @@ Imports:
     randomForest,
     ranger,
     e1071,
+    liquidSVM,
     caret,
     pROC,
     SomaticSignatures,

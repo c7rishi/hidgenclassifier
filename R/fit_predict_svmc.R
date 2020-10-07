@@ -1,11 +1,14 @@
 #' Hidden genome SVM classifier (svmc)
 #'
-#' @details Light wrapper around e1071::svm to use in hidden
+#' @details Light wrapper around e1071::svm or liquidSVM::mcSVM to use in hidden
 #' genome classification
-#' @param ... additional arguments passed to e1071:tune.svm.
+#' @param ... additional arguments passed to e1071:tune.svm, or
+#' liquidSVM::svm.
+#' @param backend the backend to use. Either "e1071" or "liquidSVM". Defaults to
+#' "liquidSVM"
 #' @inheritParams fit_smlc
 #' @export
-fit_svmc <- function(X, Y, ...) {
+fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
   dots <- list(...)
   if (is.null(dots$gamma)) {
     gamma <- 10^(-4:3)
@@ -14,20 +17,35 @@ fit_svmc <- function(X, Y, ...) {
     dots$cost <- 10^(-4:3)
   }
 
-  fit <- list(
-    x = X,
-    y = as.factor(Y),
-    probability = TRUE,
-    kernel = "radial"
-  ) %>%
-    c(dots) %>%
-    do.call(e1071::tune.svm, .)
 
+  if (backend == "e1071") {
+    fit <- list(
+      x = X,
+      y = as.factor(Y),
+      probability = TRUE,
+      kernel = "radial"
+    ) %>%
+      c(dots) %>%
+      do.call(e1071::tune.svm, .)
+  } else if (backend == "liquidSVM") {
+
+    fit <- liquidSVM::mcSVM(
+      x = as.matrix(X),
+      y = as.factor(Y),
+      predict.prob = TRUE,
+      max_gamma = 125,
+      type = "AvA_ls",
+      ...
+    )
+  }
   out <- list(
     X = X,
     Y = Y,
-    fit = fit
+    fit = fit,
+    backend = backend
   )
+
+  out
 }
 
 
@@ -39,8 +57,6 @@ predict_svmc <- function(Xnew,
                          fit,
                          Ynew = NULL, ...)  {
 
-  fit_svm <- fit$fit$best.model
-
   Xold_names <- colnames(fit$X)
   Xnew_adj <- Xnew %>%
     fill_sparsemat_zero(
@@ -48,18 +64,46 @@ predict_svmc <- function(Xnew,
       colnames = Xold_names
     )
 
-  predict_obj <- predict(
-    fit_svm,
-    newdata = Xnew_adj,
-    probability = TRUE
-  )
 
-  predict_prob <- attr(predict_obj, "probabilities") %>%
-    as.matrix() %>%
-    magrittr::set_rownames(
-      rownames(Xnew_adj)
+  if (fit$backend == "e1071") {
+    fit_svm <- fit$fit$best.model
+
+    predict_obj <- predict(
+      fit_svm,
+      newdata = Xnew_adj,
+      probability = TRUE
+    )
+
+    predict_prob <- attr(predict_obj, "probabilities") %>%
+      as.matrix() %>%
+      magrittr::set_rownames(
+        rownames(Xnew_adj)
+      ) %>%
+      .[, sort(colnames(.))]
+
+  } else if (fit$backend == "liquidSVM") {
+    fit_svm <- fit$fit
+
+    predict_prob <- predict(
+      fit_svm,
+      newdata = as.matrix(Xnew_adj)
+      # probability = TRUE
     ) %>%
-    .[, sort(colnames(.))]
+      data.matrix() %>%
+      divide_rows(
+        rowSums(.)
+      ) %>%
+      magrittr::set_colnames(
+        colnames(.) %>%
+          strsplit("vs") %>%
+          sapply(head, 1)
+      ) %>%
+      magrittr::set_rownames(
+        rownames(Xnew_adj)
+      ) %>%
+      .[, sort(colnames(.))]
+
+  }
 
 
   pred_class <- apply(

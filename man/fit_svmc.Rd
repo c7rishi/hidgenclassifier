@@ -4,7 +4,7 @@
 \alias{fit_svmc}
 \title{Hidden genome SVM classifier (svmc)}
 \usage{
-fit_svmc(X, Y, ...)
+fit_svmc(X, Y, backend = "liquidSVM", ...)
 }
 \arguments{
 \item{X}{data design matrix with observations across rows and predictors across
@@ -17,12 +17,16 @@ corresponding to specific mutation signatures etc.}
 \item{Y}{character vector or factor denoting the cancer type of tumors whose
 mutation profiles are listed across the rows of \code{X}.}
 
-\item{...}{additional arguments passed to e1071:tune.svm.}
+\item{backend}{the backend to use. Either "e1071" or "liquidSVM". Defaults to
+"liquidSVM"}
+
+\item{...}{additional arguments passed to e1071:tune.svm, or
+liquidSVM::svm.}
 }
 \description{
 Hidden genome SVM classifier (svmc)
 }
 \details{
-Light wrapper around e1071::svm to use in hidden
+Light wrapper around e1071::svm or liquidSVM::svm to use in hidden
 genome classification
 }
