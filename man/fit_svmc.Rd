@@ -27,6 +27,6 @@ liquidSVM::svm.}
 Hidden genome SVM classifier (svmc)
 }
 \details{
-Light wrapper around e1071::svm or liquidSVM::svm to use in hidden
+Light wrapper around e1071::svm or liquidSVM::mcSVM to use in hidden
 genome classification
 }
