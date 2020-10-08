@@ -1,3 +1,13 @@
+get_rand_foldid <- function(response, nfold = 10) {
+  data.table::data.table(
+    resp = response
+  )[,
+    foldid := sample(rep(1:nfold, length.out = .N)),
+    by = resp
+  ]$foldid
+}
+
+
 #' Hidden genome sparse multinomial logistic classifier (smlc)
 #' @param X data design matrix with observations across rows and predictors across
 #' columns. For a typical hidden genome classifier each row represents a tumor and
@@ -11,9 +21,18 @@
 #' penalty? Defaults to TRUE.
 #' @param ... additional arguments passed to \code{cv.glmnet}.
 #'
-#' @note   The function is a light wrapper around cv.glmnet with
+#' @note
+#' The function is a light wrapper around cv.glmnet with
 #' \code{family = "multinomial"}, and \code{type.multinomial = "grouped"} if
-#' \code{grouped} = TRUE.
+#' \code{grouped} = TRUE. \code{cv.glmnet} tunes the sparsity hyper-parameter using
+#' cross-validation. \code{fit_smlc} by default uses a 10-fold cross-validation
+#' similar to the default of \code{cv.glmnet} (can be changed by supplying
+#' \code{nfolds} in \code{...}); however with a stratified  random partition
+#' (based on the categories of \code{Y}), instead of the default simple random
+#' partition used in \code{cv.glmnet}. Override this by supplying \code{foldid} to
+#' \code{cv.glmnet} in the \code{...}. In addition, \code{fit_smlc}
+#' sets \code{maxit = 1e6} in \code{...} by default (instead of the default
+#' \code{maxit = 1e5} set in glmnet).
 #'
 #'  @return
 #' Returns a list containing the cv.glmnet fitted object,
@@ -21,7 +40,8 @@
 #' intercept vector alpha and regression coefficients matrix beta.
 #'
 #' @export
-fit_smlc <- function(X,  Y,
+fit_smlc <- function(X,
+                     Y,
                      grouped = TRUE,
                      alpha = 1,
                      ...) {
@@ -33,6 +53,17 @@ fit_smlc <- function(X,  Y,
   dots$alpha <- NULL
   dots$type.multinomial <- NULL
 
+  if (is.null(dots$nfolds)) {
+    dots$nfolds <- 10
+  }
+
+  if (is.null(dots$foldid)) {
+    dots$foldid <- get_rand_foldid(Y, dots$nfolds)
+  }
+
+  if (is.null(dots$maxit)) {
+    dots$maxit <- 1e6
+  }
 
   logis <- do.call(
     glmnet::cv.glmnet,

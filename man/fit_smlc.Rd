@@ -28,7 +28,15 @@ Hidden genome sparse multinomial logistic classifier (smlc)
 \note{
 The function is a light wrapper around cv.glmnet with
 \code{family = "multinomial"}, and \code{type.multinomial = "grouped"} if
-\code{grouped} = TRUE.
+\code{grouped} = TRUE. \code{cv.glmnet} tunes the sparsity hyper-parameter using
+cross-validation. \code{fit_smlc} by default uses a 10-fold cross-validation
+similar to the default of \code{cv.glmnet} (can be changed by supplying
+\code{nfolds} in \code{...}); however with a stratified  random partition
+(based on the categories of \code{Y}), instead of the default simple random
+partition used in \code{cv.glmnet}. Override this by supplying \code{foldid} to
+\code{cv.glmnet} in the \code{...}. In addition, \code{fit_smlc}
+sets \code{maxit = 1e6} in \code{...} by default (instead of the default
+\code{maxit = 1e5} set in glmnet).
 
 @return
 Returns a list containing the cv.glmnet fitted object,
