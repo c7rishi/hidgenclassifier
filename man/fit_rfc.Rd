@@ -4,7 +4,16 @@
 \alias{fit_rfc}
 \title{Hidden genome random forest classifier (rfc)}
 \usage{
-fit_rfc(X, Y, backend = "ranger", ...)
+fit_rfc(
+  X,
+  Y,
+  backend = "ranger",
+  tune = TRUE,
+  mtry = NULL,
+  n_mtry = 10,
+  num.trees = c(200, 500, 1000),
+  ...
+)
 }
 \arguments{
 \item{X}{data design matrix with observations across rows and predictors across
@@ -23,8 +32,12 @@ NOTE: randomForest does not support sparseMatrix, and the predictor matrix
 is coerced into an ordinary matrix. This means using randomForest will likely
 be more memory intensive and hence slower than ranger.}
 
-\item{...}{additional arguments passed to ranger or randomForest (depending
-on backend).}
+\item{tune}{logical. Tune the random forest hyper parameters? Only used if
+backend = "ranger". Defaults to TRUE. If TRUE, a list of models are trained with
+various mtry and num.trees parameters, and the fitted model with minimum oob
+prediction error is returned.}
+
+\item{...}{additional arguments passed to ranger::ranger or randomForest::randomForest (depending  on backend).}
 }
 \description{
 Hidden genome random forest classifier (rfc)

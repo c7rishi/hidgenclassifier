@@ -1,3 +1,11 @@
+as.data.frame <- function(x) {
+  if (is(class(x), "dgCMatrix")) {
+    as.data.frame(data.matrix(x))
+  } else {
+    as.data.frame(x)
+  }
+}
+
 #' Hidden genome random forest classifier (rfc)
 #'
 #' @details Light wrapper around randomForest or ranger to use in hidden
@@ -7,24 +15,72 @@
 #' NOTE: randomForest does not support sparseMatrix, and the predictor matrix
 #' is coerced into an ordinary matrix. This means using randomForest will likely
 #' be more memory intensive and hence slower than ranger.
-#' @param ... additional arguments passed to ranger or randomForest (depending
-#' on backend).
+#' @param ... additional arguments passed to ranger::ranger or randomForest::randomForest (depending  on backend).
+#' @param tune logical. Tune the random forest hyper parameters? Only used if
+#' backend = "ranger". Defaults to TRUE. If TRUE, a list of models are trained with
+#' various mtry and num.trees parameters, and the fitted model with minimum oob
+#' prediction error is returned.
 #' @inheritParams fit_smlc
 #' @export
-fit_rfc <- function(X, Y, backend = "ranger", ...) {
-
+fit_rfc <- function(
+  X, Y, backend = "ranger",
+  tune = TRUE,
+  mtry = NULL,
+  n_mtry = 10,
+  num.trees = c(200, 500, 1000),
+  ...
+) {
   if (!backend %in% c("randomForest", "ranger")) {
     stop('backend must be one of "randomForest" or "ranger"')
   }
 
+
   if (backend == "ranger") {
-    fit <- ranger::ranger(
-      x = X,
-      y = as.factor(Y),
-      classification = TRUE,
-      probability = TRUE,
-      ...
-    )
+    if (!tune) {
+      fit <- ranger::ranger(
+        x = X,
+        y = as.factor(Y),
+        classification = TRUE,
+        probability = TRUE,
+        ...
+      )
+    } else {
+
+      n_X <- ncol(X)
+      if (is.null(mtry)) {
+        mtry <- seq(
+          floor(n_X^0.3),
+          floor(n_X^0.7),
+          length.out = n_mtry
+        ) %>%
+          floor()
+      }
+
+      inparam_list <- expand.grid(
+        mtry = mtry,
+        num.trees = num.trees
+      )
+
+      fit_list <- mapply(
+        function(this_mtry, this_num.trees) {
+          ranger::ranger(
+            x = X,
+            y = as.factor(Y),
+            classification = TRUE,
+            probability = TRUE,
+            mtry = this_mtry,
+            ...
+          )
+        },
+        this_mtry = inparam_list$mtry,
+        this_num.trees = inparam_list$num.trees,
+        SIMPLIFY = FALSE
+      )
+
+      oob_error <- sapply(fit_list, "[[", "prediction.error")
+      fit <- fit_list[[which.min(oob_error)[1]]]
+
+    }
   }
   else {
     fit <- randomForest::randomForest(
@@ -52,8 +108,7 @@ fit_rfc <- function(X, Y, backend = "ranger", ...) {
 #' @export
 predict_rfc <- function(fit,
                         Xnew,
-                        Ynew = NULL, ...)  {
-
+                        Ynew = NULL, ...) {
   fit_rf <- fit$fit
 
   if (fit$backend == "ranger") {
@@ -79,7 +134,6 @@ predict_rfc <- function(fit,
     predict_prob <- predict_obj$predictions %>%
       magrittr::set_rownames(rownames(Xnew_adj)) %>%
       .[, sort(colnames(.))]
-
   } else {
     Xnew_adj <- as.matrix(Xnew_adj)
     predict_prob <- as.matrix(
@@ -98,7 +152,9 @@ predict_rfc <- function(fit,
     function(x) names(x)[which.max(x)]
   )
 
-  list("predicted" = pred_class,
-       "probs_predicted" = predict_prob,
-       "observed" = Ynew)
+  list(
+    "predicted" = pred_class,
+    "probs_predicted" = predict_prob,
+    "observed" = Ynew
+  )
 }
