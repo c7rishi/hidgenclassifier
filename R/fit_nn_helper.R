@@ -23,62 +23,56 @@
 #' @param num_classes Number of classes
 #'
 #' @return A compiled Keras model
-#'
+#' @author Zoe Guan
 #' @examples
-#' model = create_model(learning_rate=0.001, weight_decay=0.5, dropout=0.2, num_dense_layers=2, num_dense_nodes=20, activation='relu', seed=1, input_shape=1324, num_classes=8)
+#' model <- create_model(learning_rate = 0.001, weight_decay = 0.5, dropout = 0.2, num_dense_layers = 2, num_dense_nodes = 20, activation = "relu", seed = 1, input_shape = 1324, num_classes = 8)
 #' summary(model)
-#'
-#' Author: Zoe Guan, email: \code{guanZ@mskcc.org}
-create_model = function(
-  learning_rate=0.001,
-  weight_decay=0,
-  dropout=0,
-  num_dense_layers=1,
-  num_dense_nodes=5,
-  activation="relu",
-  seed=NULL,
-  input_shape,
-  num_classes
-) {
+create_model <- function(learning_rate = 0.001,
+                         weight_decay = 0,
+                         dropout = 0,
+                         num_dense_layers = 1,
+                         num_dense_nodes = 5,
+                         activation = "relu",
+                         seed = NULL,
+                         input_shape,
+                         num_classes) {
+  model <- keras_model_sequential()
 
-  model = keras_model_sequential()
-
-  if (num_dense_layers==0) {
+  if (num_dense_layers == 0) {
 
     # output layer
     model %>%
       layer_dense(
         units = num_classes,
-        activation='softmax',
+        activation = "softmax",
         kernel_initializer = initializer_glorot_uniform(seed),
-        input_shape=input_shape
+        input_shape = input_shape
       )
-
   } else {
 
     # hidden layers
     for (i in 1:num_dense_layers) {
-      if (i==1) {
+      if (i == 1) {
         model %>%
           layer_dense(
             units = num_dense_nodes,
             activation = activation,
-            kernel_regularizer=regularizer_l2(weight_decay),
+            kernel_regularizer = regularizer_l2(weight_decay),
             kernel_initializer = initializer_glorot_uniform(seed),
-            input_shape=input_shape
+            input_shape = input_shape
           ) %>%
           # dropout
-          layer_dropout(rate=dropout, seed=seed)
+          layer_dropout(rate = dropout, seed = seed)
       } else {
         model %>%
           layer_dense(
             units = num_dense_nodes,
             activation = activation,
-            kernel_regularizer=regularizer_l2(weight_decay),
+            kernel_regularizer = regularizer_l2(weight_decay),
             kernel_initializer = initializer_glorot_uniform(seed)
           ) %>%
           # dropout
-          layer_dropout(rate=dropout, seed=seed)
+          layer_dropout(rate = dropout, seed = seed)
       }
     }
 
@@ -87,19 +81,18 @@ create_model = function(
       layer_dense(
         units = num_classes,
         kernel_initializer = initializer_glorot_uniform(seed),
-        activation='softmax'
+        activation = "softmax"
       )
-
   }
 
   # optimizer
-  optimizer = optimizer_adam(lr=learning_rate)
+  optimizer <- optimizer_adam(lr = learning_rate)
 
   # compile model
   model %>%
     compile(
-      loss='categorical_crossentropy',
-      optimizer=optimizer,
+      loss = "categorical_crossentropy",
+      optimizer = optimizer,
       metrics = "accuracy"
     )
 
@@ -122,18 +115,51 @@ create_model = function(
 #'
 #' @return Validation accuracy
 #'
-fitness = function(X_train_norm, Y_train_onehot, X_val_norm, Y_val_onehot, learning_rate, weight_decay, dropout, num_dense_layers, num_dense_nodes, activation, epochs=50, batch_size=32, verbose=0, seed=NULL) {
+fitness <- function(X_train_norm,
+                    Y_train_onehot,
+                    X_val_norm,
+                    Y_val_onehot,
+                    learning_rate,
+                    weight_decay,
+                    dropout,
+                    num_dense_layers,
+                    num_dense_nodes,
+                    activation,
+                    epochs = 50,
+                    batch_size = 128,
+                    verbose = 0,
+                    seed = NULL) {
+  input_shape <- ncol(X_train_norm)
+  num_classes <- ncol(Y_train_onehot)
 
-  input_shape = ncol(X_train_norm)
-  num_classes = ncol(Y_train_onehot)
-
-  model = create_model(learning_rate, weight_decay, dropout, num_dense_layers, num_dense_nodes, activation, seed, input_shape, num_classes)
+  model <- create_model(
+    learning_rate,
+    weight_decay,
+    dropout,
+    num_dense_layers,
+    num_dense_nodes,
+    activation,
+    seed,
+    input_shape,
+    num_classes
+  )
 
   # train model
-  history = fit(model, X_train_norm, Y_train_onehot, epochs=epochs, batch_size=batch_size, validation_data=list(X_val_norm, Y_val_onehot), verbose=verbose)
+  history <- fit(
+    model,
+    X_train_norm,
+    Y_train_onehot,
+    epochs = epochs,
+    batch_size = batch_size,
+    validation_data = list(
+      X_val_norm,
+      Y_val_onehot
+    ),
+    verbose = verbose
+  )
 
   # get accuracy in validation set
-  accuracy = history$metrics$val_acc[length(history$metrics$val_acc)]
+  accuracy <- history$metrics$val_acc[length(history$metrics$val_acc)]
 
   return(accuracy)
 }
@@ -148,46 +174,45 @@ fitness = function(X_train_norm, Y_train_onehot, X_val_norm, Y_val_onehot, learn
 #'
 #' @return See description of mbo() function from mlrMBO
 #'
-tune_model = function(
-  X_train_norm,
-  Y_train_onehot,
-  X_val_norm,
-  Y_val_onehot,
-  trials=200,
-  epochs=50,
-  verbose_keras=0,
-  verbose_mbo=T,
-  seed=NULL
-) {
+tune_model <- function(X_train_norm,
+                       Y_train_onehot,
+                       X_val_norm,
+                       Y_val_onehot,
+                       trials = 200,
+                       epochs = 50,
+                       verbose_keras = 0,
+                       verbose_mbo = T,
+                       seed = NULL,
+                       batch_size = 128) {
 
   # hyperparameters to tune
-  param_set = ParamHelpers::makeParamSet(
+  param_set <- ParamHelpers::makeParamSet(
     # tune learning_rate, weight_decay, dropout on log scale
     ParamHelpers::makeNumericParam(
       "learning_rate",
-      lower=-4, upper=-2, trafo=function(x) 10^x
+      lower = -4, upper = -2, trafo = function(x) 10^x
     ),
     ParamHelpers::makeNumericParam(
       "weight_decay",
-      lower=-3,
-      upper=log10(0.5),
-      trafo=function(x) 10^x
+      lower = -3,
+      upper = log10(0.5),
+      trafo = function(x) 10^x
     ),
     ParamHelpers::makeNumericParam(
       "dropout",
-      lower=-6,
-      upper=log10(0.5),
-      trafo=function(x) 10^x
+      lower = -6,
+      upper = log10(0.5),
+      trafo = function(x) 10^x
     ),
     ParamHelpers::makeIntegerParam(
       "num_dense_layers",
-      lower=0,
-      upper=5
+      lower = 0,
+      upper = 5
     ),
     ParamHelpers::makeIntegerParam(
       "num_dense_nodes",
-      lower=5,
-      upper=1024
+      lower = 5,
+      upper = 1024
     ),
     ParamHelpers::makeDiscreteParam(
       "activation",
@@ -196,30 +221,31 @@ tune_model = function(
   )
 
   # objective function
-  obj_fn = smoof::makeSingleObjectiveFunction(
+  obj_fn <- smoof::makeSingleObjectiveFunction(
     fn = function(x) {
       fitness(
         X_train_norm,
         Y_train_onehot,
         X_val_norm,
         Y_val_onehot,
-        learning_rate=x$learning_rate,
-        weight_decay=x$weight_decay,
-        dropout=x$dropout,
-        num_dense_layers=x$num_dense_layers,
-        num_dense_nodes=x$num_dense_nodes,
-        activation=as.character(x$activation),
-        epochs=epochs,
-        verbose=verbose_keras,
-        seed=seed
+        learning_rate = x$learning_rate,
+        weight_decay = x$weight_decay,
+        dropout = x$dropout,
+        num_dense_layers = x$num_dense_layers,
+        num_dense_nodes = x$num_dense_nodes,
+        activation = as.character(x$activation),
+        epochs = epochs,
+        verbose = verbose_keras,
+        seed = seed,
+        batch_size = batch_size
       )
     },
-    par.set=param_set,
-    minimize=F,
-    has.simple.signature=F
+    par.set = param_set,
+    minimize = F,
+    has.simple.signature = F
   )
 
-  control = mlrMBO::makeMBOControl() %>%
+  control <- mlrMBO::makeMBOControl() %>%
     # aquisition function: expected improvement
     mlrMBO::setMBOControlInfill(
       crit = mlrMBO::makeMBOInfillCritEI()
@@ -230,19 +256,20 @@ tune_model = function(
     )
 
   # surrogate model: Gaussian process
-  surrogate = mlr::makeLearner(
+  surrogate <- mlr::makeLearner(
     "regr.gausspr",
     predict.type = "se",
-    config = list(show.learner.output = FALSE))
+    config = list(show.learner.output = FALSE)
+  )
 
   # initial random points
-  initial_points = ParamHelpers::generateDesign(
+  initial_points <- ParamHelpers::generateDesign(
     par.set = ParamHelpers::getParamSet(obj_fn),
     fun = lhs::randomLHS
   )
 
   # run search
-  run = mlrMBO::mbo(
+  run <- mlrMBO::mbo(
     fun = obj_fn,
     design = initial_points,
     learner = surrogate,
@@ -252,4 +279,3 @@ tune_model = function(
 
   return(run)
 }
-

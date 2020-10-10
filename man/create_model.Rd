@@ -42,8 +42,9 @@ A compiled Keras model
 Initialize a fully-connected multi-class neural network
 }
 \examples{
-model = create_model(learning_rate=0.001, weight_decay=0.5, dropout=0.2, num_dense_layers=2, num_dense_nodes=20, activation='relu', seed=1, input_shape=1324, num_classes=8)
+model <- create_model(learning_rate = 0.001, weight_decay = 0.5, dropout = 0.2, num_dense_layers = 2, num_dense_nodes = 20, activation = "relu", seed = 1, input_shape = 1324, num_classes = 8)
 summary(model)
-
-Author: Zoe Guan, email: \code{guanZ@mskcc.org}
+}
+\author{
+Zoe Guan
 }

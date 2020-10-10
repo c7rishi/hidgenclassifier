@@ -16,7 +16,7 @@ fitness(
   num_dense_nodes,
   activation,
   epochs = 50,
-  batch_size = 32,
+  batch_size = 128,
   verbose = 0,
   seed = NULL
 )

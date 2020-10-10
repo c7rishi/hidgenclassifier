@@ -13,7 +13,8 @@ tune_model(
   epochs = 50,
   verbose_keras = 0,
   verbose_mbo = T,
-  seed = NULL
+  seed = NULL,
+  batch_size = 128
 )
 }
 \arguments{

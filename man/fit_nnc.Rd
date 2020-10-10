@@ -10,6 +10,7 @@ fit_nnc(
   val_split = 1/3,
   trials = 200,
   epochs = 50,
+  batch_size = 128,
   verbose_mbo = T,
   seed = 1
 )
