@@ -190,7 +190,9 @@ tune_model <- function(X_train_norm,
     # tune learning_rate, weight_decay, dropout on log scale
     ParamHelpers::makeNumericParam(
       "learning_rate",
-      lower = -4, upper = -2, trafo = function(x) 10^x
+      lower = -4,
+      upper = -2,
+      trafo = function(x) 10^x
     ),
     ParamHelpers::makeNumericParam(
       "weight_decay",

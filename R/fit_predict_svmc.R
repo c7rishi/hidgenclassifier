@@ -29,14 +29,23 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
       do.call(e1071::tune.svm, .)
   } else if (backend == "liquidSVM") {
 
-    fit <- liquidSVM::mcSVM(
-      x = as.matrix(X),
-      y = as.factor(Y),
-      predict.prob = TRUE,
-      max_gamma = 125,
-      type = "AvA_ls",
-      ...
-    )
+    if (is.null(dots$type)) {
+      dots$type <- "AvA_ls"
+    }
+    if (is.null(dots$max_gamma)) {
+      dots$max_gamma <- 1e6
+    }
+
+    if (is.null(dots$min_lambda)) {
+      dots$min_lambda <- 1e-7
+    }
+
+    fit <- list(x = as.matrix(X),
+                y = as.factor(Y),
+                predict.prob = TRUE) %>%
+      c(dots) %>%
+      do.call(liquidSVM::mcSVM, .)
+
   }
   out <- list(
     X = X,
