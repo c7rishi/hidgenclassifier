@@ -26,9 +26,11 @@ fit_rfc <- function(
   X, Y, backend = "ranger",
   tune = TRUE,
   mtry = NULL,
-  n_mtry = 6,
-  max.depth = c(0, 10^(-4:1)),
+  n_mtry = 3,
+  max.depth = c(0, 0.001, 0.1),
   num.trees = 1000,
+  min.node.size = c(5, 10, 20),
+  return_all = FALSE,
   ...
 ) {
   if (!backend %in% c("randomForest", "ranger")) {
@@ -47,27 +49,29 @@ fit_rfc <- function(
         mtry = mtry,
         num.trees = num.trees,
         max.depth = max.depth[1],
+        min.node.size = min.node.size[1],
         ...
       )
     } else {
 
       n_X <- ncol(X)
       if (is.null(mtry)) {
-        mtry <- seq(
-          floor(n_X^0.3),
-          floor(n_X^0.7),
-          length.out = n_mtry
+        mtry <- n_X^seq(
+          0.3, 0.7, length.out = n_mtry
         ) %>%
           floor()
       }
 
       inparam_list <- expand.grid(
         mtry = mtry,
-        max.depth = max.depth
+        max.depth = max.depth,
+        min.node.size = min.node.size
       )
 
       fit_list <- mapply(
-        function(this_mtry, this_max.depth) {
+        function(this_mtry,
+                 this_max.depth,
+                 this_min.node.size) {
           ranger::ranger(
             x = X,
             y = as.factor(Y),
@@ -76,11 +80,13 @@ fit_rfc <- function(
             num.trees = num.trees,
             mtry = this_mtry,
             max.depth = this_max.depth,
+            min.node.size = this_min.node.size,
             ...
           )
         },
         this_mtry = inparam_list$mtry,
         this_max.depth = inparam_list$max.depth,
+        this_min.node.size = inparam_list$min.node.size,
         SIMPLIFY = FALSE
       )
 
@@ -102,6 +108,10 @@ fit_rfc <- function(
     fit = fit,
     backend = backend
   )
+
+  if (tune & return_all) {
+    out$fit_all <- fit_list
+  }
 
   out
 }

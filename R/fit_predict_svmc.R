@@ -32,12 +32,21 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
     if (is.null(dots$type)) {
       dots$type <- "AvA_ls"
     }
+
     if (is.null(dots$max_gamma)) {
       dots$max_gamma <- 1e6
     }
 
+    if (is.null(dots$max_gamma)) {
+      dots$min_gamma <- 1e-4
+    }
+
     if (is.null(dots$min_lambda)) {
       dots$min_lambda <- 1e-7
+    }
+
+    if (is.null(dots$scale)) {
+      dots$scale <- FALSE
     }
 
     fit <- list(x = as.matrix(X),
