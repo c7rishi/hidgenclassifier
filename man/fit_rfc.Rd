@@ -10,8 +10,9 @@ fit_rfc(
   backend = "ranger",
   tune = TRUE,
   mtry = NULL,
-  n_mtry = 10,
-  num.trees = c(200, 500, 1000),
+  n_mtry = 6,
+  max.depth = c(0, 10^(-4:1)),
+  num.trees = 1000,
   ...
 )
 }

@@ -26,14 +26,16 @@ fit_rfc <- function(
   X, Y, backend = "ranger",
   tune = TRUE,
   mtry = NULL,
-  n_mtry = 10,
-  num.trees = c(200, 500, 1000),
+  n_mtry = 6,
+  max.depth = c(0, 10^(-4:1)),
+  num.trees = 1000,
   ...
 ) {
   if (!backend %in% c("randomForest", "ranger")) {
     stop('backend must be one of "randomForest" or "ranger"')
   }
 
+  dots <- list(...)
 
   if (backend == "ranger") {
     if (!tune) {
@@ -42,6 +44,9 @@ fit_rfc <- function(
         y = as.factor(Y),
         classification = TRUE,
         probability = TRUE,
+        mtry = mtry,
+        num.trees = num.trees,
+        max.depth = max.depth[1],
         ...
       )
     } else {
@@ -58,22 +63,24 @@ fit_rfc <- function(
 
       inparam_list <- expand.grid(
         mtry = mtry,
-        num.trees = num.trees
+        max.depth = max.depth
       )
 
       fit_list <- mapply(
-        function(this_mtry, this_num.trees) {
+        function(this_mtry, this_max.depth) {
           ranger::ranger(
             x = X,
             y = as.factor(Y),
             classification = TRUE,
             probability = TRUE,
+            num.trees = num.trees,
             mtry = this_mtry,
+            max.depth = this_max.depth,
             ...
           )
         },
         this_mtry = inparam_list$mtry,
-        this_num.trees = inparam_list$num.trees,
+        this_max.depth = inparam_list$max.depth,
         SIMPLIFY = FALSE
       )
 
