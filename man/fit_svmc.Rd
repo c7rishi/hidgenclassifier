@@ -4,7 +4,7 @@
 \alias{fit_svmc}
 \title{Hidden genome SVM classifier (svmc)}
 \usage{
-fit_svmc(X, Y, backend = "liquidSVM", ...)
+fit_svmc(X, Y, backend = "liquidSVM", scale = TRUE, ...)
 }
 \arguments{
 \item{X}{data design matrix with observations across rows and predictors across

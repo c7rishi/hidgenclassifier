@@ -8,7 +8,11 @@
 #' "liquidSVM"
 #' @inheritParams fit_smlc
 #' @export
-fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
+fit_svmc <- function(X,
+                     Y,
+                     backend = "liquidSVM",
+                     scale = TRUE,
+                     ...) {
   dots <- list(...)
   if (is.null(dots$gamma)) {
     gamma <- 10^(-4:3)
@@ -17,6 +21,18 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
     dots$cost <- 10^(-4:3)
   }
 
+
+  if (scale) {
+    X_scale <- apply(X, 2, max) %>%
+      pmax(1) %>%
+      # ifelse(. < 1e-10, 1, .) %>%
+      setNames(colnames(X))
+    X <- X %>%
+      scale(center = FALSE, scale = X_scale) %>%
+      Matrix::Matrix(sparse = TRUE)
+
+    # X[is.nan(X)] <- 0
+  }
 
   if (backend == "e1071") {
     fit <- list(
@@ -45,9 +61,10 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
       dots$min_lambda <- 1e-7
     }
 
-    if (is.null(dots$scale)) {
-      dots$scale <- FALSE
-    }
+    # if (is.null(dots$scale)) {
+    #   dots$scale <- FALSE
+    # }
+
 
     fit <- list(x = as.matrix(X),
                 y = as.factor(Y),
@@ -60,6 +77,7 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
     X = X,
     Y = Y,
     fit = fit,
+    scale = scale,
     backend = backend
   )
 
@@ -71,8 +89,8 @@ fit_svmc <- function(X, Y, backend = "liquidSVM", ...) {
 
 #' prediction based on hidden genome random forest classifier
 #' @export
-predict_svmc <- function(Xnew,
-                         fit,
+predict_svmc <- function(fit,
+                         Xnew,
                          Ynew = NULL, ...)  {
 
   Xold_names <- colnames(fit$X)
@@ -81,6 +99,21 @@ predict_svmc <- function(Xnew,
       rownames = rownames(.),
       colnames = Xold_names
     )
+
+
+  if (fit$scale) {
+    Xscale <- rep(1, ncol(Xnew_adj)) %>%
+      setNames(colnames(Xnew_adj))
+
+    Xscale[colnames(Xold_names)] <- attr(
+      fit$X,
+      "scaled:scale"
+    )[colnames(fit$X)]
+
+    Xnew_adj <- Xnew_adj %>%
+      divide_cols(Xscale) %>%
+      Matrix::Matrix(sparse = TRUE)
+  }
 
 
   if (fit$backend == "e1071") {

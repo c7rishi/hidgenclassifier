@@ -4,7 +4,7 @@
 \alias{predict_svmc}
 \title{prediction based on hidden genome random forest classifier}
 \usage{
-predict_svmc(Xnew, fit, Ynew = NULL, ...)
+predict_svmc(fit, Xnew, Ynew = NULL, ...)
 }
 \description{
 prediction based on hidden genome random forest classifier
