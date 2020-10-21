@@ -23,14 +23,16 @@ fit_svmc <- function(X,
 
 
   if (scale) {
+
     X_scale <- apply(X, 2, max) %>%
       pmax(1) %>%
-      # ifelse(. < 1e-10, 1, .) %>%
       setNames(colnames(X))
+
     X <- X %>%
       scale(center = FALSE, scale = X_scale) %>%
       Matrix::Matrix(sparse = TRUE)
 
+    attr(X, "scaled:scale") <- X_scale
     # X[is.nan(X)] <- 0
   }
 
@@ -60,11 +62,6 @@ fit_svmc <- function(X,
     if (is.null(dots$min_lambda)) {
       dots$min_lambda <- 1e-7
     }
-
-    # if (is.null(dots$scale)) {
-    #   dots$scale <- FALSE
-    # }
-
 
     fit <- list(x = as.matrix(X),
                 y = as.factor(Y),
