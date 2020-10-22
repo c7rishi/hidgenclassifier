@@ -12,6 +12,7 @@ fit_svmc <- function(X,
                      Y,
                      backend = "liquidSVM",
                      scale = TRUE,
+                     scale_fn = function(x) 2*sd(x),
                      ...) {
   dots <- list(...)
   if (is.null(dots$gamma)) {
@@ -24,13 +25,18 @@ fit_svmc <- function(X,
 
   if (scale) {
 
-    X_scale <- apply(X, 2, max) %>%
+    X_scale <- apply(
+      X, 2,
+      match.fun(scale_fn)
+    ) %>%
       pmax(1) %>%
       setNames(colnames(X))
 
+    # X <- X %>%
+    #   scale(center = FALSE, scale = X_scale) %>%
+    #   Matrix::Matrix(sparse = TRUE)
     X <- X %>%
-      scale(center = FALSE, scale = X_scale) %>%
-      Matrix::Matrix(sparse = TRUE)
+      divide_cols(X_scale)
 
     attr(X, "scaled:scale") <- X_scale
     # X[is.nan(X)] <- 0
@@ -56,11 +62,11 @@ fit_svmc <- function(X,
     }
 
     if (is.null(dots$min_gamma)) {
-      dots$min_gamma <- 1e-4
+      dots$min_gamma <- 1e-8
     }
 
     if (is.null(dots$min_lambda)) {
-      dots$min_lambda <- 1e-7
+      dots$min_lambda <- 1e-8
     }
 
     fit <- list(x = as.matrix(X),
@@ -102,10 +108,10 @@ predict_svmc <- function(fit,
     Xscale <- rep(1, ncol(Xnew_adj)) %>%
       setNames(colnames(Xnew_adj))
 
-    Xscale[colnames(Xold_names)] <- attr(
+    Xscale[Xold_names] <- attr(
       fit$X,
       "scaled:scale"
-    )[colnames(fit$X)]
+    )[Xold_names]
 
     Xnew_adj <- Xnew_adj %>%
       divide_cols(Xscale) %>%
