@@ -31,7 +31,8 @@ get_rand_foldid <- function(response, nfold = 10) {
 #' (based on the categories of \code{Y}), instead of the default simple random
 #' partition used in \code{cv.glmnet}. Override this by supplying \code{foldid} to
 #' \code{cv.glmnet} in the \code{...}. In addition, \code{fit_smlc}
-#' sets \code{maxit = 1e6} in \code{...} by default (instead of the default
+#' sets \code{maxit = 1e6}, \code{trace.it = TRUE} in \code{...} by default
+#' (instead of the default
 #' \code{maxit = 1e5} set in glmnet).
 #'
 #'  @return
@@ -63,6 +64,10 @@ fit_smlc <- function(X,
 
   if (is.null(dots$maxit)) {
     dots$maxit <- 1e6
+  }
+
+  if (is.null(dots$trace.it)) {
+    dots$trace.it <- TRUE
   }
 
   logis <- do.call(
