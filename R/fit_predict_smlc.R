@@ -68,6 +68,12 @@ fit_smlc <- function(X,
 
   if (is.null(dots$trace.it)) {
     dots$trace.it <- TRUE
+    if (!is.null(dots$parallel)) {
+      if (dots$parallel) {
+        dots$trace.it <- FALSE
+      }
+    }
+
   }
 
   logis <- do.call(
