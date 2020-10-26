@@ -32,14 +32,10 @@ fit_svmc <- function(X,
       pmax(1) %>%
       setNames(colnames(X))
 
-    # X <- X %>%
-    #   scale(center = FALSE, scale = X_scale) %>%
-    #   Matrix::Matrix(sparse = TRUE)
     X <- X %>%
       divide_cols(X_scale)
 
     attr(X, "scaled:scale") <- X_scale
-    # X[is.nan(X)] <- 0
   }
 
   if (backend == "e1071") {

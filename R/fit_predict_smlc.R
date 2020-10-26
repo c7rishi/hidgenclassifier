@@ -46,7 +46,6 @@ fit_smlc <- function(X,
                      grouped = TRUE,
                      alpha = 1,
                      ...) {
-  X <- Matrix::Matrix(X, sparse = TRUE)
   type.multinomial <- ifelse(grouped,
                              "grouped",
                              "ungrouped")
@@ -79,10 +78,13 @@ fit_smlc <- function(X,
   logis <- do.call(
     glmnet::cv.glmnet,
     c(
-      list(x = X, y = Y,
-           family = "multinomial",
-           alpha = alpha,
-           type.multinomial = type.multinomial),
+      list(
+        x = Matrix::Matrix(X, sparse = TRUE),
+        y = Y,
+        family = "multinomial",
+        alpha = alpha,
+        type.multinomial = type.multinomial
+      ),
       dots
     )
   )
