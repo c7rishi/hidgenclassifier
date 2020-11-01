@@ -40,6 +40,8 @@ Imports:
     lhs,
     ParamHelpers,
     smoof,
-    mlr
+    mlr,
+    ggplot2,
+    precrec
 LinkingTo: 
     Rcpp

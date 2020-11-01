@@ -40,6 +40,8 @@ get_rand_foldid <- function(response, nfold = 10) {
 #' the original X and Y and the estimated
 #' intercept vector alpha and regression coefficients matrix beta.
 #'
+#'
+#'
 #' @export
 fit_smlc <- function(X,
                      Y,
@@ -63,6 +65,10 @@ fit_smlc <- function(X,
 
   if (is.null(dots$maxit)) {
     dots$maxit <- 1e6
+  }
+
+  if (is.null(dots$keep)) {
+    dots$keep <- TRUE
   }
 
   if (is.null(dots$trace.it)) {
@@ -101,7 +107,9 @@ fit_smlc <- function(X,
        beta = beta_mat,
        X = X,
        Y = Y,
-       fit = logis)
+       fit = logis,
+       method = "mlogit",
+       glmnet_keep = dots$keep)
 }
 
 #' adjust Xnew by discarding columns not in Xold_colnames
@@ -186,4 +194,3 @@ predict_smlc <- function(fit,
 
   res
 }
-

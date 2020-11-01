@@ -159,7 +159,8 @@ fit_nnc <- function(X,
   out <- list(
     X = X,
     Y = Y,
-    fit = fit
+    fit = fit,
+    method = "nn"
   )
 
   out

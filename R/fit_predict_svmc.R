@@ -77,7 +77,8 @@ fit_svmc <- function(X,
     Y = Y,
     fit = fit,
     scale = scale,
-    backend = backend
+    backend = backend,
+    method = "svm"
   )
 
   out

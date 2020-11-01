@@ -6,6 +6,7 @@
 #' @import stats
 #' @import methods
 #' @import keras
+#' @importFrom ggplot2 autoplot
 ## usethis namespace: end
 NULL
 

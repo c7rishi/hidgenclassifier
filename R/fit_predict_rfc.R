@@ -100,7 +100,8 @@ fit_rfc <- function(
     X = X,
     Y = Y,
     fit = fit,
-    backend = backend
+    backend = backend,
+    method = "nn"
   )
 
   out

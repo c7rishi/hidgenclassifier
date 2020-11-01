@@ -1,0 +1,24 @@
+#' MSK-IMPACT data on somatic mutation annotation data from 10 cancer sites
+#'
+#' A subset of the publicly available MSK-IMPACT (a targeted clinical gene panel)
+#' sequencing data containing non-synonymous SNV mutations. More specifically,
+#' the subset of the MSK-IMPACT data with
+#' \code{Variant_Type == "SNP"} and  tumors from the following 10 cancer sites:
+#' BREAST, COLORECTAL, ESOPHAGEAL, KIDNEY, LIVER,
+#' LUNG, MELANOMA, OVARIAN, PANCREATIC, and PROSTATE
+#' @format A dataset with 38,854 rows and 16 columns:
+#' \describe{
+#' \item{Hugo_Symbol}{the gene label}
+#' \item{Chromosome}{Chromosome label}
+#' \item{Variant}{the variant label. Obtained by concatenating
+#' the columns labeled
+#' 'Hugo_Symbol', 'Chromosome', 'Start_Position', 'Tumor_Seq_Allele1',
+#' and 'Tumor_Seq_Allele2' in the original MSK-IMPACT data}
+#' \item{patient_id}{the patient (tumor) label. Obtained by extracting
+#' the first 9 characters of the column'Tumor_Sample_Barcode' in
+#' the original MSK-IMPACT data}
+#' @source
+#' https://github.com/cBioPortal/datahub
+#'
+
+"impact"
