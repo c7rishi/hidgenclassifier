@@ -3,7 +3,8 @@
 \name{optimal_threshold}
 \alias{optimal_threshold}
 \title{Determining optimal one-vs-rest classification
-thresholds from fitted hidden genome models}
+thresholds from fitted hidden genome models using
+predicting performance measures}
 \usage{
 optimal_threshold(fit, measure = "fscore", ...)
 }
@@ -26,5 +27,6 @@ corresponding to that \code{measure}.
 }
 \description{
 Determining optimal one-vs-rest classification
-thresholds from fitted hidden genome models
+thresholds from fitted hidden genome models using
+predicting performance measures
 }

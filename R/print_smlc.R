@@ -1,5 +1,3 @@
-#' Print smlc fit results
-#' @export
 print_single <- function(out) {
 
   if (length(unique(na.omit(out$obs))) == 2) {

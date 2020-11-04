@@ -1,5 +1,7 @@
 #' Determining optimal one-vs-rest classification
-#' thresholds from fitted hidden genome models
+#' thresholds from fitted hidden genome models using
+#' predicting performance measures
+#'
 #' @param fit fitted hidden genome classifier object
 #' @param measure prediction assessment measure.
 #'
