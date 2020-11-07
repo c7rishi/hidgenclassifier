@@ -18,9 +18,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_dist_pair
+double calc_dist_pair(NumericVector P, NumericVector Q, String dist_type, double alpha);
+RcppExport SEXP _hidgenclassifier_calc_dist_pair(SEXP PSEXP, SEXP QSEXP, SEXP dist_typeSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< String >::type dist_type(dist_typeSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_dist_pair(P, Q, dist_type, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_dist_refvec_targetmat
+NumericVector calc_dist_refvec_targetmat(NumericVector P, NumericMatrix Qmat, String dist_type, double alpha);
+RcppExport SEXP _hidgenclassifier_calc_dist_refvec_targetmat(SEXP PSEXP, SEXP QmatSEXP, SEXP dist_typeSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Qmat(QmatSEXP);
+    Rcpp::traits::input_parameter< String >::type dist_type(dist_typeSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_dist_refvec_targetmat(P, Qmat, dist_type, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_hidgenclassifier_Cpp_calc_minfo", (DL_FUNC) &_hidgenclassifier_Cpp_calc_minfo, 3},
+    {"_hidgenclassifier_calc_dist_pair", (DL_FUNC) &_hidgenclassifier_calc_dist_pair, 4},
+    {"_hidgenclassifier_calc_dist_refvec_targetmat", (DL_FUNC) &_hidgenclassifier_calc_dist_refvec_targetmat, 4},
     {NULL, NULL, 0}
 };
 

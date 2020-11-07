@@ -5,3 +5,11 @@ Cpp_calc_minfo <- function(prob_mat, wt_vec, normalized = 1L) {
     .Call(`_hidgenclassifier_Cpp_calc_minfo`, prob_mat, wt_vec, normalized)
 }
 
+calc_dist_pair <- function(P, Q, dist_type = "jsdist", alpha = 2) {
+    .Call(`_hidgenclassifier_calc_dist_pair`, P, Q, dist_type, alpha)
+}
+
+calc_dist_refvec_targetmat <- function(P, Qmat, dist_type = "jsdist", alpha = 2) {
+    .Call(`_hidgenclassifier_calc_dist_refvec_targetmat`, P, Qmat, dist_type, alpha)
+}
+
