@@ -15,4 +15,4 @@ Then install `hidgenclassifier` as follows:
 devtools::install_github("c7rishi/hidgenclassifier")
 ```
 
-Note that `hidgenclassifier` contains source C++ codes which require compilation, and thus requires the necessary C++ compilers to be pre-installed. This, for example, can be ensured in Windows computers by installing [Rtools](https://cran.r-project.org/bin/windows/Rtools/). See the [CRAN manual on installing R packages](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages) for more details on installing source R packages on various platforms.
+Note that `hidgenclassifier` contains source C++ codes, and thus requires the necessary C++ compilers to be pre-installed. This, for example, can be ensured in Windows computers by installing [Rtools](https://cran.r-project.org/bin/windows/Rtools/). See the [CRAN manual on installing R packages](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages) for more details on installing source R packages on various platforms.
