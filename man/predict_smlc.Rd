@@ -2,10 +2,13 @@
 % Please edit documentation in R/fit_predict_smlc.R
 \name{predict_smlc}
 \alias{predict_smlc}
+\alias{predict_mlogit}
 \title{Prediction based on the hidden genome sparse multinomial
 logistic classifier}
 \usage{
 predict_smlc(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
+
+predict_mlogit(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
 }
 \arguments{
 \item{fit}{fitted hidden genome classifier, an output of fit_smlc.}

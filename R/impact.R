@@ -17,6 +17,18 @@
 #' \item{patient_id}{the patient (tumor) label. Obtained by extracting
 #' the first 9 characters of the column'Tumor_Sample_Barcode' in
 #' the original MSK-IMPACT data}
+#' \item{Start_Position}{...}
+#' \item{End_Position}{...}
+#' \item{Tumor_Seq_Allele1}{...}
+#' \item{Tumor_Seq_Allele2}{...}
+#' \item{Reference_Allele}{...}
+#' \item{HGVSp_Short}{...}
+#' \item{Variant_Type}{...}
+#' \item{Variant_Classification}{...}
+#' \item{CANCER_TYPE}{...}
+#' \item{CANCER_TYPE_DETAILED}{...}
+#' \item{CANCER_SITE}{...}
+#' \item{Position_1Mb}{...}
 #' @source
 #' https://github.com/cBioPortal/datahub
 #'

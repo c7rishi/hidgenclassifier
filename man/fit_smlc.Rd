@@ -2,9 +2,12 @@
 % Please edit documentation in R/fit_predict_smlc.R
 \name{fit_smlc}
 \alias{fit_smlc}
+\alias{fit_mlogit}
 \title{Hidden genome sparse multinomial logistic classifier (smlc)}
 \usage{
 fit_smlc(X, Y, grouped = TRUE, alpha = 1, ...)
+
+fit_mlogit(X, Y, grouped = TRUE, alpha = 1, ...)
 }
 \arguments{
 \item{X}{data design matrix with observations across rows and predictors across
@@ -22,6 +25,11 @@ penalty? Defaults to TRUE.}
 
 \item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
+\value{
+Returns a list containing the cv.glmnet fitted object,
+the original X and Y and the estimated
+intercept vector alpha and regression coefficients matrix beta.
+}
 \description{
 Hidden genome sparse multinomial logistic classifier (smlc)
 }
@@ -38,9 +46,4 @@ partition used in \code{cv.glmnet}. Override this by supplying \code{foldid} to
 sets \code{maxit = 1e6}, \code{trace.it = TRUE} in \code{...} by default
 (instead of the default
 \code{maxit = 1e5} set in glmnet).
-
-@return
-Returns a list containing the cv.glmnet fitted object,
-the original X and Y and the estimated
-intercept vector alpha and regression coefficients matrix beta.
 }

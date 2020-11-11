@@ -35,7 +35,7 @@ get_rand_foldid <- function(response, nfold = 10) {
 #' (instead of the default
 #' \code{maxit = 1e5} set in glmnet).
 #'
-#'  @return
+#' @return
 #' Returns a list containing the cv.glmnet fitted object,
 #' the original X and Y and the estimated
 #' intercept vector alpha and regression coefficients matrix beta.
@@ -111,6 +111,10 @@ fit_smlc <- function(X,
        method = "mlogit",
        glmnet_keep = dots$keep)
 }
+
+#' @rdname fit_smlc
+#' @export
+fit_mlogit <- fit_smlc
 
 #' adjust Xnew by discarding columns not in Xold_colnames
 #' and by adding 0-valued columns that are in Xold_colnames
@@ -194,3 +198,7 @@ predict_smlc <- function(fit,
 
   res
 }
+
+#' @rdname predict_smlc
+#' @export
+predict_mlogit <- predict_smlc

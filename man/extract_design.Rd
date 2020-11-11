@@ -15,7 +15,7 @@ extract_design(
 \arguments{
 \item{maf}{mutation annotation file --
 a data frame-like object with at least two columns containing
-variant IDs and sample IDs. NOTE: uniqueness of rows of maf is assumed.}
+variant labels and sample IDs. NOTE: uniqueness of rows of maf is assumed.}
 
 \item{variant_col}{name of the column in \code{maf} containing variant labels.}
 

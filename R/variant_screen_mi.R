@@ -5,7 +5,7 @@
 #'
 #' @param maf mutation annotation file --
 #' a data frame-like object with at least three columns containing
-#' variant IDs, sample IDs, and cancer sites associated with the sample IDs.
+#' variant labels, sample IDs, and cancer sites associated with the sample IDs.
 #' NOTE: uniqueness of rows of maf is assumed.
 #' @param variant_col name of the column in \code{maf} containing variant labels.
 #' @param sample_id_col name of the column in \code{maf} containing tumor sample IDs.

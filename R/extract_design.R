@@ -7,7 +7,7 @@
 #' column names of the output.
 #' @param maf mutation annotation file --
 #' a data frame-like object with at least two columns containing
-#' variant IDs and sample IDs. NOTE: uniqueness of rows of maf is assumed.
+#' variant labels and sample IDs. NOTE: uniqueness of rows of maf is assumed.
 #' @return returns an n_tumor x n_variants design matrix for
 #' variant indicators (in sparseMatrix format)
 #'
