@@ -14,8 +14,7 @@ BiocManager::install(
   c(SomaticSignatures,
     VariantAnnotation,
     IRanges,
-    BSgenome.Hsapiens.UCSC.hg19
-  )
+    BSgenome.Hsapiens.UCSC.hg19)
 )
 ```
 
