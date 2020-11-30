@@ -45,3 +45,5 @@ Imports:
     precrec
 LinkingTo: 
     Rcpp
+Suggests:
+    tidyverse

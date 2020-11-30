@@ -1,5 +1,5 @@
 # hidgenclassifier
-An R package for Bayesian hierarchical hidden genome classification. Provides functionalilites for pre-processing genomic datasets to be used in the classifier, training the hidden genome classifier, and predicting cancer classes of new tumors based on a trained model. 
+An R package for Bayesian hierarchical hidden genome classification. Provides functionalities for pre-processing genomic datasets to be used in the classifier, training the hidden genome classifier, and predicting cancer classes of new tumors based on a trained model. 
 
 
 # How to Install
@@ -7,7 +7,7 @@ An R package for Bayesian hierarchical hidden genome classification. Provides fu
 ## Installing Bioconductor dependencies
 
 `hidgenclassifier` depends on a number of Bioconductor packages. To install these dependencies run the following commands in R:
-```
+```{r}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(

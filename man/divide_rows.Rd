@@ -26,3 +26,16 @@ Formally, \code{divide_rows(mat, vec)} is equivalent to
 sweep(mat, 1, vec "/"), but is usually more efficient, and
 plays nicer with {magrittr} pipe \code{\%>\%}.
 }
+\examples{
+mat <- rbind(
+c(2, 3, 4),
+c(3, 4, 5),
+c(8, 9, 10)
+)
+vec <- c(1, 2, 3)
+
+divide_rows(mat, vec)
+divide_cols(mat, vec)
+
+
+}
