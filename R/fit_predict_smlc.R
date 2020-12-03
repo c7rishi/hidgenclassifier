@@ -203,6 +203,8 @@ adjust_Xnew <- function(Xnew, Xold_colnames) {
 #' corresponding to specific mutation signatures etc.
 #' @param fit fitted hidden genome mlogit classifier, an output of fit_smlc.
 #' @param Ynew the actual cancer categories for the test samples.
+#' This is not used in computation, but is return as a component in the output,
+#' for possibly easier post-processing.
 #'
 #' @note  Predictors in \code{Xnew} that are not present in the
 #' training set design matrix (stored in \code{fit}) are dropped, and predictors
@@ -215,6 +217,16 @@ adjust_Xnew <- function(Xnew, Xold_colnames) {
 #' However, care must be taken for predictors whose 0 values
 #' do not indicate absence.
 #' @seealso fit_mlogit
+#'
+#' @return  a list with entries (a) probs_predicted: a n_test_tumor by n_cancer
+#' matrix of multinomial probabilities, providing
+#' the predicted probability of each test set
+#' tumor being classified into each cancer site,
+#' and (b) predicted : a character vector listing
+#' hard classes based on the predicted multinomial
+#' probabilities (obtained by assigning tumors to
+#' the classes with highest predicted probabilities), and
+#' optionally (c) observed, if Ynew is provided.
 #'
 #' @export
 predict_smlc <- function(fit,

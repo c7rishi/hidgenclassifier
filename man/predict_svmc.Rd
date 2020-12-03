@@ -19,7 +19,9 @@ the total mutation burdens in tumors) binary 1-0 presence/absence of
 raw variants, counts of mutations at specific genes and counts of mutations
 corresponding to specific mutation signatures etc.}
 
-\item{Ynew}{the actual cancer categories for the test samples.}
+\item{Ynew}{the actual cancer categories for the test samples.
+This is not used in computation, but is return as a component in the output,
+for possibly easier post-processing.}
 }
 \description{
 prediction based on hidden genome random forest classifier

@@ -370,12 +370,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>In this vignette, we illustrate how to train a hidden genome (multinomial logistic) classifier on MSK-IMPACT tumors from 10 cancer sites using the R package <code>hidgenclassifier</code>.</p>
 <div id="load-packages-and-import-data" class="section level2">
 <h2>Load packages and import data</h2>
-<p>We start by setting a seed, loading the <code>hidgenclassifier</code> and <code>magrittr</code> packages (for its pipe operator), and importing the <code>impact</code> data from <code>hidgenclassifier</code>.</p>
+<p>We start by setting a seed, loading the <code>hidgenclassifier</code> and <code>magrittr</code> packages (the latter being used for its pipe <code>%&gt;%</code> operator), and importing the <code>impact</code> data from <code>hidgenclassifier</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(magrittr)</span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="kw">library</span>(hidgenclassifier)</span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="kw">data</span>(<span class="st">&quot;impact&quot;</span>)</span></code></pre></div>
-<p>The impact mutation annotation dataset (stored as a <code>data.table</code> object) looks like this:</p>
+<p>The impact mutation annotation dataset (stored as a <code>data.table</code> object) looks like the following:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>impact</span></code></pre></div>
 <pre><code>##        Hugo_Symbol Chromosome Start_Position End_Position Tumor_Seq_Allele1
 ##     1:        SPEN          1       16265908     16265908                 A
@@ -441,7 +441,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">unique</span>(impact<span class="op">$</span>CANCER_SITE)</span></code></pre></div>
 <pre><code>##  [1] &quot;BREAST&quot;     &quot;LIVER&quot;      &quot;OVARIAN&quot;    &quot;ESOPHAGEAL&quot; &quot;LUNG&quot;      
 ##  [6] &quot;COLORECTAL&quot; &quot;PANCREATIC&quot; &quot;PROSTATE&quot;   &quot;KIDNEY&quot;     &quot;SKIN&quot;</code></pre>
-<p>We want to train a hidden genome (multinomial logistic) classifier with these 10 cancer sites (response classes) using the variants listed in column “Variant” as predictor while simultaneously utilizing the meta-features gene (column “Hugo_Symbol”) and 96 Single Base Substitution (SBS-96) categories. The sample/patient ids of tumors are listed in column “patient_id”. Enter <code>?impact</code> in the R console to see more details on the dataset.</p>
+<p>The sample/patient ids of tumors are listed in the column “patient_id”. Enter <code>?impact</code> in the R console to see more details on the dataset. We want to train a hidden genome (multinomial logistic) classifier with the above 10 cancer sites (response classes) using the variants listed in column “Variant” as predictor while simultaneously utilizing the meta-features gene (column “Hugo_Symbol”) and 96 Single Base Substitution (SBS-96) categories.</p>
 </div>
 <div id="training-a-hidden-genome-classifier" class="section level2">
 <h2>Training a hidden genome classifier</h2>
@@ -454,7 +454,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb6-4"><a href="#cb6-4"></a>  <span class="dt">sample_id_col =</span> <span class="st">&quot;patient_id&quot;</span></span>
 <span id="cb6-5"><a href="#cb6-5"></a>)</span>
 <span id="cb6-6"><a href="#cb6-6"></a>pid &lt;-<span class="st"> </span><span class="kw">names</span>(canc_resp)</span></code></pre></div>
-<p>To train the model, we first split the dataset into 5 stratified random folds, based the cancer categories. Then define our training set by combining four out of the five folds, and use the remaining fifth fold as our test set.</p>
+<p>To train the model, we first split the dataset into 5 stratified random folds, based the cancer categories. Then we define our training set by combining four out of the five folds, and use the remaining fifth fold as our test set.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb7-2"><a href="#cb7-2"></a>folds &lt;-<span class="st"> </span>data.table<span class="op">::</span><span class="kw">data.table</span>(</span>
 <span id="cb7-3"><a href="#cb7-3"></a>  <span class="dt">resp =</span> canc_resp</span>
@@ -479,7 +479,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb8-8"><a href="#cb8-8"></a>  <span class="dt">do_freq_screen =</span> <span class="ot">FALSE</span></span>
 <span id="cb8-9"><a href="#cb8-9"></a>)</span></code></pre></div>
 <p>Note that by default <code>do_freq_screen</code> is set to <code>FALSE</code>; if <code>do_freq_screen = TRUE</code>, then an overall (relative) frequency-based screening is performed <em>prior to</em> MI based screening. This may reduce the computation load substantially for whole genome datasets where potentially tens of millions of variants, each with little individual discriminative information, are observed only once. The relative frequence threshold can be set by <code>thresh_freq_screen</code> (defaults to 1/n_sample where n_sample is the pan-cancer total number of tumors.)</p>
-<p>With the most discriminative variants determined and stored in <code>top_v</code>, we now extract the variant design matrix X restricted to these variants for <em>all tumors</em>. (The matrix will be row-subsetted to <code>pid_train</code> during training; the remaining rows will be used for prediction):</p>
+<p>With the most discriminative variants determined and stored in <code>top_v</code>, we now extract the variant design matrix X restricted to the variants in <code>top_v</code> and for <em>all tumors</em>. (The matrix will be row-subsetted to <code>pid_train</code> during training; the remaining rows will be used for prediction):</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>X_variant &lt;-<span class="st"> </span><span class="kw">extract_design</span>(</span>
 <span id="cb9-2"><a href="#cb9-2"></a>  <span class="dt">maf =</span> impact,</span>
 <span id="cb9-3"><a href="#cb9-3"></a>  <span class="dt">variant_col =</span> <span class="st">&quot;Variant&quot;</span>,</span>
@@ -524,7 +524,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb15-3"><a href="#cb15-3"></a>  <span class="dt">variant_col =</span> <span class="st">&quot;Variant&quot;</span>,</span>
 <span id="cb15-4"><a href="#cb15-4"></a>  <span class="dt">sample_id_col =</span> <span class="st">&quot;patient_id&quot;</span></span>
 <span id="cb15-5"><a href="#cb15-5"></a>)</span></code></pre></div>
-<p>We are now in a position to create the predictor matrix for the hidden genome model, by column-binding all X and XU matrices, and then subsequently normalizing the rows of the column-bound matrix by the square-root of the total mutation burdens in the tumor; the resulting entries correspond to various scalar projections as described in the manuscript. We use the convenience function <code>divide_rows</code> for this normalization inside a chained (using <code>magrittr</code> pipe) computation steps.</p>
+<p>We are now in a position to create the predictor matrix for the hidden genome model, by column-binding all X and XU matrices, and subsequently normalizing the rows of the column-bound matrix by the square-root of the total mutation burdens in the tumor; the resulting entries correspond to various scalar projections as described in the manuscript. We use the convenience function <code>divide_rows</code> for this normalization inside a chained (using <code>magrittr</code> pipe) computation steps.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>predictor_mat &lt;-<span class="st"> </span><span class="kw">cbind</span>(</span>
 <span id="cb16-2"><a href="#cb16-2"></a>  X_variant[pid, ],</span>
 <span id="cb16-3"><a href="#cb16-3"></a>  XU_gene[pid, ],</span>
@@ -536,7 +536,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="fitting-the-mutlinomial-logistic-hidden-genome-classifier" class="section level3">
 <h3>Fitting the mutlinomial logistic hidden genome classifier</h3>
-<p>We use the function <code>fit_mlogit</code> to fit a hidden genome multinomial logistic classifier with <code>predictor_mat</code> as the predictor matrix, and <code>canc_resp</code> as the response cancer classes. The fitting is restricted to the training set tumors <code>pid_train</code>. This takes a while to compute, so we recommend saving the result into a file once the function stops. Enter <code>?fit_mlogit</code> in the R console to see a detailed description of the arguments of <code>fit_mlogit</code>.</p>
+<p>We use the function <code>fit_mlogit</code> to fit a hidden genome multinomial logistic classifier with <code>predictor_mat</code> as the predictor matrix, and <code>canc_resp</code> as the response cancer classes. The fitting is restricted to the training set tumors <code>pid_train</code>. The function takes a while to compute, so we recommend saving the result into a file once the function stops. Enter <code>?fit_mlogit</code> in the R console to see a detailed description of the arguments of <code>fit_mlogit</code>.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>fit_impact &lt;-<span class="st"> </span><span class="kw">fit_mlogit</span>(</span>
 <span id="cb17-2"><a href="#cb17-2"></a>  <span class="dt">X =</span> predictor_mat[pid_train, ],</span>
 <span id="cb17-3"><a href="#cb17-3"></a>  <span class="dt">Y =</span> canc_resp[pid_train]</span>
@@ -554,7 +554,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="understanding-predictor-effects-via-one-vs-rest-odds-ratios" class="section level2">
 <h2>Understanding predictor effects via one-vs-rest odds ratios</h2>
-<p>Rigorous quantification of individual predictor effects can be obtained through odds-ratios from a fitted multinomial logistic regression model. We consider one-vs-rest odds ratio of a tumor being classified into a specific cancer category, relative to not being classified into that category, for one standard deviation change in each predictor from its mean, while keeping all other predictors fixed at their respective means. This can be obtained using the function: <code>odds_ratio_mlogit</code></p>
+<p>Rigorous quantification of individual predictor effects can be obtained through odds-ratios from a fitted multinomial logistic regression model. We consider one-vs-rest odds ratio of a tumor being classified into a specific cancer category, relative to not being classified into that category, for one standard deviation change in each predictor from its mean, while keeping all other predictors fixed at their respective means. This can be obtained using the function <code>odds_ratio_mlogit</code>:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>or &lt;-<span class="st"> </span><span class="kw">odds_ratio_mlogit</span>(</span>
 <span id="cb19-2"><a href="#cb19-2"></a>  <span class="dt">fit =</span> fit_impact,</span>
 <span id="cb19-3"><a href="#cb19-3"></a>  <span class="dt">type =</span> <span class="st">&quot;one-vs-rest&quot;</span>,</span>

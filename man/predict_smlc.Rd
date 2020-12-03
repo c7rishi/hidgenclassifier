@@ -22,7 +22,20 @@ the total mutation burdens in tumors) binary 1-0 presence/absence of
 raw variants, counts of mutations at specific genes and counts of mutations
 corresponding to specific mutation signatures etc.}
 
-\item{Ynew}{the actual cancer categories for the test samples.}
+\item{Ynew}{the actual cancer categories for the test samples.
+This is not used in computation, but is return as a component in the output,
+for possibly easier post-processing.}
+}
+\value{
+a list with entries (a) probs_predicted: a n_test_tumor by n_cancer
+matrix of multinomial probabilities, providing
+the predicted probability of each test set
+tumor being classified into each cancer site,
+and (b) predicted : a character vector listing
+hard classes based on the predicted multinomial
+probabilities (obtained by assigning tumors to
+the classes with highest predicted probabilities), and
+optionally (c) observed, if Ynew is provided.
 }
 \description{
 Prediction based on the hidden genome sparse multinomial
