@@ -1,10 +1,15 @@
 #' Calculate odds ratios from a multinomial logistic
 #' hidden genome model
+#' @inheritParams predict_mlogit
 #' @param type either "one-vs-rest" or "one-vs-one".
 #' @param baseline_category The response category with respect to which
 #' odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
 #' If NULL (default), the first response cancer category obtained after sorting the
 #' column labels (using \code{sort()}) is used.
+#' @param log logical. Should the odds ratios be returned in log scale?
+#' Defaults to TRUE.
+#' @param predictor_subset Character vector listing the subset of predictors in
+#' the fitted model \code{fit} for which odds ratios are to be computed.
 #' @details
 #' If  \code{type = "one-vs-rest"}, odds ratios are calculated for each predictor,
 #' across all response categories, for one unit (one standard deviation unit,
@@ -14,8 +19,12 @@
 #' If \code{type = "one-vs-one"}, odds ratios relative to a baseline category
 #' is calculated. (Not implemented yet.)
 #'
+#' @return
+#' Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors
+#' (along the rows) across cancer sites (along the columns).
+#'
 #' @export
-odds_ratio_smlc <- function(
+odds_ratio_mlogit <- function(
   fit,
   type = "one-vs-rest",
   scale = TRUE,
@@ -93,3 +102,7 @@ odds_ratio_smlc <- function(
 
   out
 }
+
+#' @rdname odds_ratio_mlogit
+#' @export
+odds_ratio_smlc <- odds_ratio_mlogit

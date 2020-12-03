@@ -21,6 +21,59 @@ as.data.frame <- function(x) {
 #' various mtry and num.trees parameters, and the fitted model with minimum oob
 #' prediction error is returned.
 #' @inheritParams fit_smlc
+#'
+#' @examples
+#' data("impact")
+#' top_v <- variant_screen_mi(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id",
+#'   mi_rank_thresh = 50,
+#'   return_prob_mi = FALSE
+#' )
+#' var_design <- extract_design(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   sample_id_col = "patient_id",
+#'   variant_subset = top_v
+#' )
+#'
+#' canc_resp <- extract_cancer_response(
+#'   maf = impact,
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id"
+#' )
+#' pid <- names(canc_resp)
+#' # create five stratified random folds
+#' # based on the response cancer categories
+#' set.seed(42)
+#' folds <- data.table::data.table(
+#'   resp = canc_resp
+#' )[,
+#'   foldid := sample(rep(1:5, length.out = .N)),
+#'   by = resp
+#' ]$foldid
+#'
+#' # 80%-20% stratified separation of training and
+#' # test set tumors
+#' idx_train <- pid[folds != 5]
+#' idx_test <- pid[folds == 5]
+#'
+#' # train a classifier on the training set
+#' # using only variants (will have low accuracy
+#' # -- no meta-feature information used)
+#' fit0 <- fit_rfc(
+#'   X = var_design[idx_train, ],
+#'   Y = canc_resp[idx_train],
+#'   tune = FALSE
+#' )
+#'
+#' pred0 <- predict_rfc(
+#'   fit = fit0,
+#'   Xnew = var_design[idx_test, ]
+#' )
+#'
 #' @export
 fit_rfc <- function(
   X, Y, backend = "ranger",

@@ -201,7 +201,7 @@ adjust_Xnew <- function(Xnew, Xold_colnames) {
 #' the total mutation burdens in tumors) binary 1-0 presence/absence of
 #' raw variants, counts of mutations at specific genes and counts of mutations
 #' corresponding to specific mutation signatures etc.
-#' @param fit fitted hidden genome classifier, an output of fit_smlc.
+#' @param fit fitted hidden genome mlogit classifier, an output of fit_smlc.
 #' @param Ynew the actual cancer categories for the test samples.
 #'
 #' @note  Predictors in \code{Xnew} that are not present in the

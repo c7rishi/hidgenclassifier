@@ -6,6 +6,24 @@
 \usage{
 predict_svmc(fit, Xnew, Ynew = NULL, ...)
 }
+\arguments{
+\item{fit}{fitted hidden genome SVM classifier (output of
+\code{fit_svmc()})}
+
+\item{Xnew}{test data design (or meta-design) matrix (observations
+across rows and variables predictors/features across columns)
+for which predictions are to be made from a fitted model. For a typical hidden
+genome classifier this will be a matrix whose rows correspond to the test set
+tumors, and columns correspond to (normalized by some functions of
+the total mutation burdens in tumors) binary 1-0 presence/absence of
+raw variants, counts of mutations at specific genes and counts of mutations
+corresponding to specific mutation signatures etc.}
+
+\item{Ynew}{the actual cancer categories for the test samples.}
+}
 \description{
 prediction based on hidden genome random forest classifier
+}
+\seealso{
+fit_svmc
 }

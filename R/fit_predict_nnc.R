@@ -54,10 +54,70 @@ new_nn <- function(map_df, model, model_raw, ind_val, tuning_results, preproc) {
 #' \item{tuning_results}{Named list with the results from the hyperparameter search (output of mbo() from mlrMBO). The list elements include "x", a named list with the best hyperparameters found, and "y", the validation accuracy corresponding to the best hyperparameters. See description of MBOSingleObjResult from mlrMBO for more details.}
 #' \item{preproc}{Named list with the parameters of the min-max pre-processing transformation applied to X prior to training (output of preProcess() from caret)}
 #'
+#' @note
+#' The function uses packages {keras} and {tensorflow} for fitting neurual networks, which
+#' requires a python environment in the backend. See the installation notes for
+#' the keras R package for more details.
+#'
 #' @references
 #' Jiao W, Atwal G, Polak P, Karlic R, Cuppen E, Danyi A, De Ridder J, van Herpen C, Lolkema MP, Steeghs N, Getz G. A deep learning system accurately classifies primary and metastatic cancers using passenger mutation patterns. Nature communications. 2020 Feb 5;11(1):1-2.
 #'
 #' @author Zoe Guan. Email: guanZ@mskcc.org
+#'
+#' @examples
+#' data("impact")
+#' top_v <- variant_screen_mi(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id",
+#'   mi_rank_thresh = 50,
+#'   return_prob_mi = FALSE
+#' )
+#' var_design <- extract_design(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   sample_id_col = "patient_id",
+#'   variant_subset = top_v
+#' )
+#'
+#' canc_resp <- extract_cancer_response(
+#'   maf = impact,
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id"
+#' )
+#' pid <- names(canc_resp)
+#' # create five stratified random folds
+#' # based on the response cancer categories
+#' set.seed(42)
+#' folds <- data.table::data.table(
+#'   resp = canc_resp
+#' )[,
+#'   foldid := sample(rep(1:5, length.out = .N)),
+#'   by = resp
+#' ]$foldid
+#'
+#' # 80%-20% stratified separation of training and
+#' # test set tumors
+#' idx_train <- pid[folds != 5]
+#' idx_test <- pid[folds == 5]
+#'
+#' # train a classifier on the training set
+#' # using only variants (will have low accuracy
+#' # -- no meta-feature information used
+#' fit0 <- fit_nnc(
+#'   X = var_design[idx_train, ],
+#'   Y = canc_resp[idx_train],
+#'   trials = 10,
+#'   epochs = 5
+#' )
+#'
+#' pred0 <- predict_nnc(
+#'   fit = fit0,
+#'   Xnew = var_design[idx_test, ]
+#' )
+#'
+#'
 #' @export
 fit_nnc <- function(X,
                     Y,
@@ -174,7 +234,7 @@ fit_nnc <- function(X,
 #' @param fit Fitted neural network hidden genome classifier
 #' (output of fit_nnc())
 #'
-#' @return list with entries:
+#' @seealso fit_nnc
 #'
 #' @export
 predict_nnc <- function(fit,

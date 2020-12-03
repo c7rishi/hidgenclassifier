@@ -12,9 +12,9 @@ predict_nnc(fit, Xnew, Ynew = NULL, ...)
 
 \item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
-\value{
-list with entries:
-}
 \description{
 Get neural network predictions
+}
+\seealso{
+fit_nnc
 }

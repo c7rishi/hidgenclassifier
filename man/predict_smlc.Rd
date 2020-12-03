@@ -11,7 +11,7 @@ predict_smlc(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
 predict_mlogit(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
 }
 \arguments{
-\item{fit}{fitted hidden genome classifier, an output of fit_smlc.}
+\item{fit}{fitted hidden genome mlogit classifier, an output of fit_smlc.}
 
 \item{Xnew}{test data design (or meta-design) matrix (observations
 across rows and variables predictors/features across columns)
