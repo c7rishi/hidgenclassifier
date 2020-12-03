@@ -180,7 +180,7 @@ pred_impact <- predict_mlogit(
   Xnew = predictor_mat[pid_test, ]
 )
 ```
-This creates a list with entries (a) `probs_predicted`: a n_test_tumor by n_cancer matrix of multinomial probabilities, providing the predicted probability of each test set tumor being classified into each cancer site, and (b) `predicted` : a character vector listing hard classes based on the predicted multinomial probabilities (obtained by assigning tumors to the classes with highest predicted probabilities).
+This creates a list with entries (a) `probs_predicted`: a n_test_tumor by n_cancer matrix of multinomial probabilities, providing the predicted probability of each test set tumor being classified into each cancer site, and (b) `predicted` : a character vector listing hard classes based on the predicted multinomial probabilities (obtained by assigning tumors to the classes with the highest predicted probabilities).
 
 
 ## Understanding predictor effects via one-vs-rest odds ratios

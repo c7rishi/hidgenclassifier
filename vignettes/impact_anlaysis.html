@@ -550,7 +550,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb18-2"><a href="#cb18-2"></a>  <span class="dt">fit =</span> fit_impact,</span>
 <span id="cb18-3"><a href="#cb18-3"></a>  <span class="dt">Xnew =</span> predictor_mat[pid_test, ]</span>
 <span id="cb18-4"><a href="#cb18-4"></a>)</span></code></pre></div>
-<p>This creates a list with entries (a) <code>probs_predicted</code>: a n_test_tumor by n_cancer matrix of multinomial probabilities, providing the predicted probability of each test set tumor being classified into each cancer site, and (b) <code>predicted</code> : a character vector listing hard classes based on the predicted multinomial probabilities (obtained by assigning tumors to the classes with highest predicted probabilities).</p>
+<p>This creates a list with entries (a) <code>probs_predicted</code>: a n_test_tumor by n_cancer matrix of multinomial probabilities, providing the predicted probability of each test set tumor being classified into each cancer site, and (b) <code>predicted</code> : a character vector listing hard classes based on the predicted multinomial probabilities (obtained by assigning tumors to the classes with the highest predicted probabilities).</p>
 </div>
 <div id="understanding-predictor-effects-via-one-vs-rest-odds-ratios" class="section level2">
 <h2>Understanding predictor effects via one-vs-rest odds ratios</h2>

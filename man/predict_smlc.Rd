@@ -27,15 +27,17 @@ This is not used in computation, but is return as a component in the output,
 for possibly easier post-processing.}
 }
 \value{
-a list with entries (a) probs_predicted: a n_test_tumor by n_cancer
+a list with entries (a) probs_predicted:
+a \code{ncol(Xnew)} by n_cancer  (determined from \code{fit})
 matrix of multinomial probabilities, providing
-the predicted probability of each test set
-tumor being classified into each cancer site,
+the predicted probability of each sample unit in Xnew
+being classified into each cancer site,
 and (b) predicted : a character vector listing
 hard classes based on the predicted multinomial
-probabilities (obtained by assigning tumors to
-the classes with highest predicted probabilities), and
-optionally (c) observed, if Ynew is provided.
+probabilities (obtained by assigning individuals to
+the classes with the highest predicted probabilities), and
+optionally, (c) observed: if Ynew is supplied, then it
+is returned as is.
 }
 \description{
 Prediction based on the hidden genome sparse multinomial
