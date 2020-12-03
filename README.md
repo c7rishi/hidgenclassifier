@@ -25,7 +25,7 @@ BiocManager::install(
 Note that `hidgenclassifier` contains source C++ codes, and thus requires the necessary C++ compilers to be pre-installed. This, for example, can be ensured in Windows computers by installing [Rtools](https://cran.r-project.org/bin/windows/Rtools/). See the [CRAN manual on installing R packages](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages) for more details on installing source R packages on various platforms.
 
 
-The easiest way to install `hidgenclassifier` is via `R` package [devtools](https://www.r-project.org/nosvn/pandoc/devtools.html). Run the following commands in `R` to install `devtools`, if it is not already installed:
+The easiest way to install `hidgenclassifier` is from GitHub via `R` package [devtools](https://www.r-project.org/nosvn/pandoc/devtools.html). Run the following commands in `R` to install `devtools`, if it is not already installed:
 ```{r}
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
@@ -33,5 +33,11 @@ if (!requireNamespace("devtools", quietly = TRUE))
 
 Then install `hidgenclassifier` as follows:
 ```{r}
-devtools::install_github("c7rishi/hidgenclassifier")
+devtools::install_github("c7rishi/hidgenclassifier", build_vignettes = TRUE)
 ```
+
+After installation, a vignette illustrating an analysis of the publicly available MSK-IMPACT dataset (contained in the package) can be accessed by entering the following in the R console:
+```{r}
+vignette("impact_anlaysis", package = "hidgenclassifier")
+```
+A rendered copy of the vignette from this repository can be found [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/vignettes/impact_anlaysis.html).
