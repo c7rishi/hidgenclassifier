@@ -1,10 +1,19 @@
-#' Extract total mutation burden (TMB) of tumors in a maf file
+#' #' Extract total mutation burden (TMB) of tumors in a maf file
 #' @inheritParams extract_design
 #'
 #' @return
 #' Returns a numeric vector providing the total
 #' number of mutations observed in each tumor in maf, named
 #' by the sample ids in maf.
+#'
+#' @examples
+#' data("impact")
+#' tmb <- extract_tmb(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   sample_id_col = "patient_id"
+#' )
+#' tmb
 #'
 #' @export
 extract_tmb <- function(

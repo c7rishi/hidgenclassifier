@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract_TMB.R
 \name{extract_tmb}
 \alias{extract_tmb}
-\title{Extract total mutation burden (TMB) of tumors in a maf file}
+\title{#' Extract total mutation burden (TMB) of tumors in a maf file}
 \usage{
 extract_tmb(maf, variant_col = "variant", sample_id_col = "sample", ...)
 }
@@ -23,5 +23,15 @@ number of mutations observed in each tumor in maf, named
 by the sample ids in maf.
 }
 \description{
-Extract total mutation burden (TMB) of tumors in a maf file
+#' Extract total mutation burden (TMB) of tumors in a maf file
+}
+\examples{
+data("impact")
+tmb <- extract_tmb(
+  maf = impact,
+  variant_col = "Variant",
+  sample_id_col = "patient_id"
+)
+tmb
+
 }
