@@ -12,7 +12,7 @@
 #' all other predictors fixed at their respective means.
 #'
 #' If \code{type = "one-vs-one"}, odds ratios relative to a baseline category
-#' is calculated.
+#' is calculated. (Not implemented yet.)
 #'
 #' @export
 odds_ratio_smlc <- function(

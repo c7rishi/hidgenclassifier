@@ -34,3 +34,13 @@ Convenience function for extracting cancer (response)
 categories corresponding to all tumors
 in a maf file for use in a hidden genome classifier
 }
+\examples{
+data("impact")
+cancer_resp <- extract_cancer_response(
+  maf = impact,
+  cancer_col = "CANCER_SITE",
+  sample_id_col = "patient_id"
+)
+head(cancer_resp)
+
+}

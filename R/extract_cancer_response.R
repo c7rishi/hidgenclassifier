@@ -13,6 +13,15 @@
 #' Returns a character vector containing cancer sites as determined
 #' from cancer_col in maf, and named according to sample_id_col in maf.
 #'
+#' @examples
+#' data("impact")
+#' cancer_resp <- extract_cancer_response(
+#'   maf = impact,
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id"
+#' )
+#' head(cancer_resp)
+#'
 #' @export
 extract_cancer_response <- function(
   maf,

@@ -40,3 +40,6 @@ predictor value essentially indicates some form of "absence".
 However, care must be taken for predictors whose 0 values
 do not indicate absence.
 }
+\seealso{
+fit_mlogit
+}

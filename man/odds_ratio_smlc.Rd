@@ -34,5 +34,5 @@ if \code{scale = TRUE}) increase in each predictor at its mean, while keeping
 all other predictors fixed at their respective means.
 
 If \code{type = "one-vs-one"}, odds ratios relative to a baseline category
-is calculated.
+is calculated. (Not implemented yet.)
 }

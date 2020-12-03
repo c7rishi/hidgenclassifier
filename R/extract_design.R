@@ -9,13 +9,28 @@
 #' a data frame-like object with at least two columns containing
 #' variant labels and sample IDs. NOTE: uniqueness of rows of maf is assumed.
 #' @return returns an n_tumor x n_variants design matrix for
-#' variant indicators (in sparseMatrix format)
+#' variant indicators (in dgCMatrix format)
+#'
+#' @examples
+#'
+#' data("impact")
+#' top_v <- variant_screen_mi(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id",
+#'   mi_rank_thresh = 200,
+#'   return_prob_mi = FALSE
+#' )
+#' var_design <- extract_design(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   sample_id_col = "patient_id",
+#'   variant_subset = top_v
+#' )
+#' dim(var_design)
 #'
 #'
-#' OUTPUT:
-#' an N_patients x N_variants (or N_genes) (sparse) design
-#' (or design-meta-design) matrix with appropriate row and
-#' variant_col names.
 #' @export
 extract_design <- function(
   maf,

@@ -7,6 +7,26 @@
 #' NOTE: uniqueness of rows of maf is assumed.
 #' @param mfeat_col name of the column in \code{maf} containing categorical
 #' meta-feature labels.
+#' @param mfeat_subset character vector providing the subset of categories of
+#' the meta-feature for which the design matrix is to be created. If NULL
+#' (default), all unique categories present in the \code{mfeat}_col in
+#' \code{maf} is considered.
+#'
+#' @return
+#' An n_tumor x n_gene sparse dgCMatrix, with (i, j)th entry providing the total
+#' number of variants in tumor i associated with j-th meta-feature category,
+#' as determined by \code{mfeat_col} of \code{maf}.
+#'
+#' @examples
+#' data("impact")
+#' gene_mdesign <- extract_design_mdesign_mcat(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   mfeat_col = "Hugo_Symbol",
+#'   sample_id_col = "patient_id"
+#' )
+#' dim(gene_mdesign)
+#'
 #' @export
 extract_design_mdesign_mcat <- function(
   maf,

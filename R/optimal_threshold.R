@@ -16,7 +16,6 @@
 #' entry providing the optimal thresholds across all cancer categories
 #' (along with the associated optimal measure values as an attribute)
 #'corresponding to that \code{measure}.
-#' @export
 
 optimal_threshold <- function(fit,
                               measure = "fscore",

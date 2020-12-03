@@ -34,8 +34,8 @@ SBS-96 contexts for all mutations in \code{maf} be returned as an
 attribute named \code{VRanges} of the output? Defaults to FALSE.}
 }
 \value{
-An n_tumor x 96 sparseMatrix, with (i, j)th entry providing the total
-number of variants n tumor i associated with j-th SBS-96 category.
+An n_tumor x 96 sparse dgCMatrix, with (i, j)th entry providing the total
+number of variants in tumor i associated with j-th SBS-96 category.
 }
 \description{
 Extract Design-Metadesign (XU) matrix for SBS-96
@@ -56,6 +56,20 @@ in the form of a n_patient x 96 design matrix
 Using any {SomaticSignatures} function triggers the loading of
 {proxy} and {GGally} packages, which overwrites defaults S3 methods
 of a few functions from {ggplot2} and {registry}.
+}
+\examples{
+data("impact")
+sbs96_mdesign <- extract_design_mdesign_sbs96(
+  maf = impact,
+  chromosome_col = "Chromosome",
+  start_position_col = "Start_Position",
+  end_position_col = "End_Position",
+  ref_col = "Reference_Allele",
+  alt_col = "Tumor_Seq_Allele2",
+  sample_id_col = "patient_id"
+)
+dim(sbs96_mdesign)
+
 }
 \author{
 Ronglai Shen, Saptarshi Chakraborty
