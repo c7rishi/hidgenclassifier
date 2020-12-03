@@ -7,6 +7,7 @@ library(magrittr)
 library(hidgenclassifier)
 data("impact")
 
+## ---- view_data---------------------------------------------------------------
 impact
 
 ## ----defn, include=FALSE------------------------------------------------------
