@@ -1,8 +1,57 @@
-# hidgenclassifier
-An R package for Bayesian hierarchical hidden genome classification. Provides functionalities for pre-processing genomic datasets to be used in the classifier, training the hidden genome classifier, and predicting cancer classes of new tumors based on a trained model. 
+# `hidgenclassifier`: An R package implementing methodologies described in  "Mining the Hidden Genome to Map Tumor Site of Origin""
+
+## Contents
+
+- [Overview](#overview)
+- [Repo Contents](#repo-contents)
+- [System Requirements](#system-requirements)
+- [Installation Guide](#installation-guide)
+- [Demo](#demo)
 
 
-# How to Install
+# Overview
+`hidgenclassifier` is an R package for Bayesian hierarchical hidden genome classification of cancer sites. It provides various pre-processing, fitting, and post-processing functions that collectively simplify handling of genomic datasets for use in the classifier, facilitate training of the hidden genome model,  compute predicted cancer type probabilities of new tumors based on trained models, and aid rigorous quantification of predictor effects (via odds ratios) in fitted models. 
+
+# Repo Contents
+
+- [R](./R): `R` package code.
+- [data](./data): filtered subsets of TCGA whole-exome and MSK-IMPACT targeted cancer gene panel sequencing datasets used in the analysis presented in the manuscript.
+- [man](./man): package manual for help in R session.
+- [src](./src): C++ source codes implementing various computation-heavy back-end functions. 
+- [vignettes](./vignettes): `R` vignettes for R session html help pages.
+
+
+# System Requirements
+
+## Hardware Requirements
+
+The package `hidgenclassifier` can be run on a standard computer with 2 GB of RAM. For optimal performance we recommend a computer with specs:
+
+RAM: 16+ GB  
+CPU: 4+ cores, 3.3+ GHz/core
+
+The installation-times noted in the following are  from a computer with the recommended specs (16 GB RAM, 4 cores@3.3 GHz) and internet of speed 100 Mbps.
+
+## Software Requirements
+
+### OS Requirements
+
+The GitHub development version of `hidgenclassifier` has been tested on *Linux* and *Windows* operating systems as follows:
+Linux: CentOS Linux release 7.8.2003 (Core) 
+Windows: Windows 10
+
+
+### R version
+
+The package `hidgenclassifier` depends on R v3.5.0 or newer. See the installation notes on the [R project homepage](https://www.r-project.org/) for details on how to install the latest version of R.
+
+### R build tools
+
+`hidgenclassifier` contains source C++ codes, and thus requires the necessary C++ compilers to be pre-installed. This, for example, can be ensured in Windows computers by installing [Rtools](https://cran.r-project.org/bin/windows/Rtools/). See the [CRAN manual on installing R packages](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages) for more details on installing source R packages on various platforms.
+
+
+
+# Installation Guide
 
 ## Installing Bioconductor dependencies
 
@@ -22,10 +71,8 @@ BiocManager::install(
 
 ## Installing `hidgenclassifier`
 
-Note that `hidgenclassifier` contains source C++ codes, and thus requires the necessary C++ compilers to be pre-installed. This, for example, can be ensured in Windows computers by installing [Rtools](https://cran.r-project.org/bin/windows/Rtools/). See the [CRAN manual on installing R packages](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages) for more details on installing source R packages on various platforms.
 
-
-The easiest way to install `hidgenclassifier` is from GitHub via `R` package [devtools](https://www.r-project.org/nosvn/pandoc/devtools.html). Run the following commands in `R` to install `devtools`, if it is not already installed:
+Once the Bioconductor dependencies are all installed, the easiest way to install `hidgenclassifier` from GitHub is via `R` package [devtools](https://www.r-project.org/nosvn/pandoc/devtools.html). Run the following commands in `R` to install `devtools`, if it is not already installed:
 ```{r}
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
@@ -35,6 +82,14 @@ Then install `hidgenclassifier` as follows:
 ```{r}
 devtools::install_github("c7rishi/hidgenclassifier", build_vignettes = TRUE)
 ```
+
+
+## Typical install time
+
+`hidgenclassifier` depends on a number of R packages (both on CRAN and on Bioconductor), and installing them all from scratch on a Windows computer using binary packages take about 10 minutes. Install time on Linux where binary sources are not available can be substantially longer (~30 minutes). If the dependencies are all installed, `hidgenclassifier` takes about 1 minute to install. 
+
+
+# Demo
 
 After installation, a vignette illustrating an analysis of the publicly available MSK-IMPACT dataset (contained in the package) can be accessed by entering the following in the R console:
 ```{r}

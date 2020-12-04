@@ -162,7 +162,7 @@ predictor_mat <- cbind(
 
 ### Fitting the mutlinomial logistic hidden genome classifier
 
-We use the function `fit_mlogit` to fit a hidden genome multinomial logistic classifier with `predictor_mat` as the predictor matrix, and `canc_resp` as the response cancer classes. The fitting is restricted to the training set tumors `pid_train`. The function takes a while to compute, so we recommend saving the result into a file once the function stops. Enter `?fit_mlogit` in the R console to see a detailed description of the arguments of `fit_mlogit`. 
+We use the function `fit_mlogit` to fit a hidden genome multinomial logistic classifier with `predictor_mat` as the predictor matrix, and `canc_resp` as the response cancer classes. The fitting is restricted to the training set tumors `pid_train`. The function takes a while to compute (took about ~30 minutes on a Windows 10 computer with 16GB RAM, 4 cores), so we recommend saving the result into a file once the function stops. Enter `?fit_mlogit` in the R console to see a detailed description of the arguments of `fit_mlogit`. 
 ```{r fit, eval = FALSE}
 fit_impact <- fit_mlogit(
   X = predictor_mat[pid_train, ],
