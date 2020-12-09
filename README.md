@@ -60,10 +60,10 @@ The package `hidgenclassifier` depends on R v3.5.0 or newer. See the installatio
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(
-  c(SomaticSignatures,
-    VariantAnnotation,
-    IRanges,
-    BSgenome.Hsapiens.UCSC.hg19)
+  c("SomaticSignatures",
+    "VariantAnnotation",
+    "IRanges",
+    "BSgenome.Hsapiens.UCSC.hg19")
 )
 ```
 
