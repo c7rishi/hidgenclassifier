@@ -160,7 +160,9 @@ fit_rfc <- function(
   out
 }
 
-
+#' @rdname fit_rfc
+#' @export
+fit_rf <- fit_rfc
 
 
 #' prediction based on hidden genome random forest classifier
@@ -219,3 +221,7 @@ predict_rfc <- function(fit,
     "observed" = Ynew
   )
 }
+
+#' @rdname predict_rfc
+#' @export
+predict_rf <- predict_rfc

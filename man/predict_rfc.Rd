@@ -2,9 +2,12 @@
 % Please edit documentation in R/fit_predict_rfc.R
 \name{predict_rfc}
 \alias{predict_rfc}
+\alias{predict_rf}
 \title{prediction based on hidden genome random forest classifier}
 \usage{
 predict_rfc(fit, Xnew, Ynew = NULL, ...)
+
+predict_rf(fit, Xnew, Ynew = NULL, ...)
 }
 \arguments{
 \item{fit}{Fitted random forest hidden genome classifier (output of

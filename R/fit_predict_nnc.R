@@ -227,6 +227,10 @@ fit_nnc <- function(X,
 }
 
 
+#' @rdname fit_nnc
+#' @export
+fit_nn <- fit_nnc
+
 
 #' Get neural network predictions
 #'
@@ -294,6 +298,10 @@ predict_nnc <- function(fit,
   #   stop("\"type\" must be \"response\" or \"class\"")
   # }
 }
+
+#' @rdname predict_nnc
+#' @export
+predict_nn <- predict_nnc
 
 
 #' #' Create "predict" method for objects of class "nn"

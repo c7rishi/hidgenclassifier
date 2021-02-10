@@ -2,9 +2,22 @@
 % Please edit documentation in R/fit_predict_rfc.R
 \name{fit_rfc}
 \alias{fit_rfc}
+\alias{fit_rf}
 \title{Hidden genome random forest classifier (rfc)}
 \usage{
 fit_rfc(
+  X,
+  Y,
+  backend = "ranger",
+  tune = TRUE,
+  mtry = NULL,
+  n_mtry = 6,
+  max.depth = c(0, 10^(-4:1)),
+  num.trees = 1000,
+  ...
+)
+
+fit_rf(
   X,
   Y,
   backend = "ranger",

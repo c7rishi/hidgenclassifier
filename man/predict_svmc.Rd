@@ -2,9 +2,12 @@
 % Please edit documentation in R/fit_predict_svmc.R
 \name{predict_svmc}
 \alias{predict_svmc}
+\alias{predict_svm}
 \title{prediction based on hidden genome random forest classifier}
 \usage{
 predict_svmc(fit, Xnew, Ynew = NULL, ...)
+
+predict_svm(fit, Xnew, Ynew = NULL, ...)
 }
 \arguments{
 \item{fit}{fitted hidden genome SVM classifier (output of

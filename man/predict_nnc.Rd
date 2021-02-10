@@ -2,9 +2,12 @@
 % Please edit documentation in R/fit_predict_nnc.R
 \name{predict_nnc}
 \alias{predict_nnc}
+\alias{predict_nn}
 \title{Get neural network predictions}
 \usage{
 predict_nnc(fit, Xnew, Ynew = NULL, ...)
+
+predict_nn(fit, Xnew, Ynew = NULL, ...)
 }
 \arguments{
 \item{fit}{Fitted neural network hidden genome classifier

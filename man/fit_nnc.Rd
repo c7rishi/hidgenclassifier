@@ -2,9 +2,21 @@
 % Please edit documentation in R/fit_predict_nnc.R
 \name{fit_nnc}
 \alias{fit_nnc}
+\alias{fit_nn}
 \title{Train a fully-connected multi-class neural network}
 \usage{
 fit_nnc(
+  X,
+  Y,
+  val_split = 1/3,
+  trials = 200,
+  epochs = 50,
+  batch_size = 128,
+  verbose_mbo = T,
+  seed = 1
+)
+
+fit_nn(
   X,
   Y,
   val_split = 1/3,

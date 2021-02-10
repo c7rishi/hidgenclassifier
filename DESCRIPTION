@@ -1,6 +1,6 @@
 Package: hidgenclassifier
 Title: Functions for Bayesian hierarchical hidden genome classifier
-Version: 0.1.1
+Version: 0.1.2
 Author: Saptarshi Chakraborty,
         Axel Martin,
         Zoe Guan,

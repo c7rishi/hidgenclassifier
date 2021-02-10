@@ -2,16 +2,17 @@
 % Please edit documentation in R/optimal_threshold.R
 \name{optimal_threshold}
 \alias{optimal_threshold}
-\title{Determining optimal one-vs-rest classification
+\title{Determine optimal one-vs-rest classification
 thresholds from fitted hidden genome models using
-predicting performance measures}
+prediction-based performance measures}
 \usage{
-optimal_threshold(fit, measure = "fscore", ...)
+optimal_threshold(fit, measure = "fscore", fitted_prob = NULL, ...)
 }
 \arguments{
 \item{fit}{fitted hidden genome classifier object}
 
-\item{measure}{prediction assessment measure.}
+\item{measure}{prediction assessment measure. Options include "fscore",
+"mcc" (Mathews Correlation Coefficient). Can be a vector.}
 }
 \value{
 If \code{length(measure) == 1} the function returns a named vector with optimal
@@ -26,7 +27,7 @@ entry providing the optimal thresholds across all cancer categories
 corresponding to that \code{measure}.
 }
 \description{
-Determining optimal one-vs-rest classification
+Determine optimal one-vs-rest classification
 thresholds from fitted hidden genome models using
-predicting performance measures
+prediction-based performance measures
 }

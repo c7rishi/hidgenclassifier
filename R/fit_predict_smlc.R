@@ -267,3 +267,14 @@ predict_smlc <- function(fit,
 #' @rdname predict_smlc
 #' @export
 predict_mlogit <- predict_smlc
+
+
+
+#' Extract the cv.glmnet object from the output of fit_mlogit
+#' @inheritParams predict_smlc
+#' @export
+extract_glmnet <- function(fit, ...) {
+  out <- fit$fit
+  out
+}
+

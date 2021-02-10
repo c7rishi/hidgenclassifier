@@ -2,9 +2,19 @@
 % Please edit documentation in R/fit_predict_svmc.R
 \name{fit_svmc}
 \alias{fit_svmc}
+\alias{fit_svm}
 \title{Hidden genome SVM classifier (svmc)}
 \usage{
 fit_svmc(
+  X,
+  Y,
+  backend = "liquidSVM",
+  scale = TRUE,
+  scale_fn = function(x) 2 * sd(x),
+  ...
+)
+
+fit_svm(
   X,
   Y,
   backend = "liquidSVM",

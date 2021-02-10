@@ -138,6 +138,9 @@ fit_svmc <- function(X,
 }
 
 
+#' @rdname fit_svmc
+#' @export
+fit_svm <- fit_svmc
 
 
 #' prediction based on hidden genome random forest classifier
@@ -224,3 +227,8 @@ predict_svmc <- function(fit,
        "probs_predicted" = predict_prob,
        "observed" = Ynew)
 }
+
+
+#' @rdname predict_svmc
+#' @export
+predict_svm <- predict_svmc
