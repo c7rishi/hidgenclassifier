@@ -16,8 +16,9 @@ calc_one_v_rest_auc(fit, measure = c("PRC", "ROC"), fitted_prob = NULL, ...)
 }
 \value{
 Returns a data.table with \code{length(measure) + 1} columns
-("Class" and measure(s)) and n_class many rows, where n_class
-denotes the number of cancer types present in the fitted model.
+("Class" and measure(s)) and n_class + 1 many rows, where n_class
+denotes the number of cancer types present in the fitted model; the
+final row provides the Macro (average) metrics.
 }
 \description{
 Calculating area under Precision-Recall curve (PRC) and

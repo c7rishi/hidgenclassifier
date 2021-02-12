@@ -86,8 +86,9 @@ optimal_threshold <- function(fit,
 #'
 #' @return
 #' Returns a data.table with \code{length(measure) + 1} columns
-#' ("Class" and measure(s)) and n_class many rows, where n_class
-#' denotes the number of cancer types present in the fitted model.
+#' ("Class" and measure(s)) and n_class + 1 many rows, where n_class
+#' denotes the number of cancer types present in the fitted model; the
+#' final row provides the Macro (average) metrics.
 #' @export
 calc_one_v_rest_auc <- function(fit,
                                 measure = c("PRC", "ROC"),
@@ -122,8 +123,16 @@ calc_one_v_rest_auc <- function(fit,
       ]
     }
   ) %>%
-    do.call(rbind, .)
-
+    do.call(rbind, .) %>%
+    rbind(
+      .[,
+        .(
+          class = "Macro (Average)",
+          PRC = mean(PRC, na.rm = TRUE),
+          ROC = mean(ROC)
+        )
+      ]
+    )
 
   out
 }
