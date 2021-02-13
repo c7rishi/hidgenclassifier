@@ -11,8 +11,18 @@ calc_one_v_rest_auc(fit, measure = c("PRC", "ROC"), fitted_prob = NULL, ...)
 \arguments{
 \item{fit}{fitted hidden genome classifier object}
 
-\item{measure}{prediction assessment measure. Options include "fscore",
-"mcc" (Mathews Correlation Coefficient). Can be a vector.}
+\item{measure}{Type of curve to use. Options include "PRC" (Precision Recall Curve) and
+"ROC" (Receiver Operator characteristic Curve). Can be a vector.}
+
+\item{fitted_prob}{an n_tumor x n_cancer matrix of predicted classification probabilities of
+the \emph{training set tumors} to use for calculating ROC/PRC AUCs,
+where n_tumor denotes the number of tumor/sample units,
+and n_cancer is the number of cancer sites in the fitted hidden genome model (supplied
+through \code{"fit"}). Row names and column names must
+be identical to the the tumor/sample names and cancer labels used in  the fitted model. If \code{NULL}
+(default) then the fitted probabilities are obtained from the model itself by either extracting pre-validated
+predictive probabilities (only available for mlogit models), or simply using the fitted model to
+make predictions on the training set.}
 }
 \value{
 Returns a data.table with \code{length(measure) + 1} columns
@@ -24,4 +34,14 @@ final row provides the Macro (average) metrics.
 Calculating area under Precision-Recall curve (PRC) and
 Receiver-Operator characteristic curve (ROC) for all one-vs-rest
 comparisons in the fitted model
+}
+\details{
+Under the hood, the function uses several functions from R package \code{precrec}
+to compute the performance
+metrics. The argument \code{fitted_prob}, when supplied, should ideally
+contain predictive probabilities for training set tumors evaluated under a
+cross-validation framework. If not supplied, pre-validated
+prediction probabilities extracted from  mlogit models, and
+overoptimistic prediction probabilities (obtained by simply using the fitted
+model on the training data) for other models are used.
 }
