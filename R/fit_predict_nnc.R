@@ -55,9 +55,15 @@ new_nn <- function(map_df, model, model_raw, ind_val, tuning_results, preproc) {
 #' \item{preproc}{Named list with the parameters of the min-max pre-processing transformation applied to X prior to training (output of preProcess() from caret)}
 #'
 #' @note
-#' The function uses packages {keras} and {tensorflow} for fitting neurual networks, which
+#' 1. The function uses packages {keras} and {tensorflow} for fitting neurual networks, which
 #' requires a python environment in the backend. See the installation notes for
-#' the keras R package for more details.
+#' the {keras} R package for more details.
+#'
+#' 2. In addition to {keras} and {tensorflow} the function makes use of
+#' several functions from packages
+#' {caret}, {mlrMBO}, {lhs}, {ParamHelpers}, {smoof}, and {mlr}
+#' under the hood. These packages must be installed separately before using
+#' fit_nnc.
 #'
 #' @references
 #' Jiao W, Atwal G, Polak P, Karlic R, Cuppen E, Danyi A, De Ridder J, van Herpen C, Lolkema MP, Steeghs N, Getz G. A deep learning system accurately classifies primary and metastatic cancers using passenger mutation patterns. Nature communications. 2020 Feb 5;11(1):1-2.
@@ -102,6 +108,7 @@ new_nn <- function(map_df, model, model_raw, ind_val, tuning_results, preproc) {
 #' idx_train <- pid[folds != 5]
 #' idx_test <- pid[folds == 5]
 #'
+#' \dontrun{
 #' # train a classifier on the training set
 #' # using only variants (will have low accuracy
 #' # -- no meta-feature information used
@@ -117,6 +124,7 @@ new_nn <- function(map_df, model, model_raw, ind_val, tuning_results, preproc) {
 #'   Xnew = var_design[idx_test, ]
 #' )
 #'
+#' }
 #'
 #' @export
 fit_nnc <- function(X,
@@ -127,6 +135,24 @@ fit_nnc <- function(X,
                     batch_size = 128,
                     verbose_mbo = T,
                     seed = 1) {
+
+  reqd_pkgs <- c(
+    "caret",
+    "mlrMBO",
+    "keras",
+    "lhs",
+    "ParamHelpers",
+    "smoof",
+    "mlr"
+  )
+
+
+  for (pkg in reqd_pkgs) {
+    stopifnot(requireNamespace(pkg))
+  }
+
+
+  # require(keras)
 
   ### define mapping from original labels to numeric representation
   map_df <- data.frame(
@@ -139,7 +165,7 @@ fit_nnc <- function(X,
   ### apply one-hot encoding to Y
   num_classes <- length(unique(Y))
   Y_numeric <- as.numeric(factor(Y))
-  Y_onehot <- to_categorical(Y_numeric - 1)
+  Y_onehot <- keras::to_categorical(Y_numeric - 1)
 
   ### split data into training and validation set for hyperparameter tuning
   train_size <- round((1 - val_split) * length(Y))
@@ -193,7 +219,7 @@ fit_nnc <- function(X,
     input_shape,
     num_classes
   )
-  history <- fit(
+  history <- keras::fit(
     model,
     X_norm,
     Y_onehot,
@@ -209,11 +235,12 @@ fit_nnc <- function(X,
     # Y=Y,
     map_df = map_df,
     model = model,
-    model_raw = serialize_model(model),
+    model_raw = keras::serialize_model(model),
     ind_val = ind_val,
     tuning_results = tuning_results,
     preproc = preproc
   )
+
 
   # return()
   out <- list(
@@ -249,6 +276,20 @@ predict_nnc <- function(fit,
   # }
   # apply transformation
 
+  reqd_pkgs <- c(
+    "caret",
+    "mlrMBO",
+    "keras",
+    "lhs",
+    "ParamHelpers",
+    "smoof",
+    "mlr"
+  )
+
+  for (pkg in reqd_pkgs) {
+    stopifnot(requireNamespace(pkg))
+  }
+
   object <- fit$fit
   Xold_names <- colnames(fit$X)
   newdata <- Xnew_adj <- Xnew %>%
@@ -260,7 +301,7 @@ predict_nnc <- function(fit,
   newdata_norm <- predict(object$preproc, as.matrix(newdata))
   # get predicted probabilities
   pred_prob <- object$model_raw %>%
-    unserialize_model() %>%
+    keras::unserialize_model() %>%
     predict(newdata_norm) %>%
     magrittr::set_colnames(
       as.character(

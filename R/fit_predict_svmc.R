@@ -5,7 +5,8 @@
 #' @param ... additional arguments passed to e1071:tune.svm, or
 #' liquidSVM::svm.
 #' @param backend the backend to use. Either "e1071" or "liquidSVM". Defaults to
-#' "liquidSVM"
+#' "liquidSVM". NOTE: these packages are required to be installed separately.
+#'
 #' @inheritParams fit_smlc
 #'
 #' @examples
@@ -46,6 +47,7 @@
 #' idx_train <- pid[folds != 5]
 #' idx_test <- pid[folds == 5]
 #'
+#' \dontrun{
 #' # train a classifier on the training set
 #' # using only variants (will have low accuracy
 #' # -- no meta-feature information used)
@@ -58,7 +60,7 @@
 #'   fit = fit0,
 #'   Xnew = var_design[idx_test, ]
 #' )
-#'
+#' }
 #'
 #' @export
 fit_svmc <- function(X,
@@ -76,6 +78,10 @@ fit_svmc <- function(X,
   }
 
 
+  if (!backend %in% c("e1071", "liquidSVM")) {
+    stop("backend must be either 'e1071' or 'liquidSVM'")
+  }
+
   if (scale) {
 
     X_scale <- apply(
@@ -92,39 +98,60 @@ fit_svmc <- function(X,
   }
 
   if (backend == "e1071") {
-    fit <- list(
-      x = X,
-      y = as.factor(Y),
-      probability = TRUE,
-      kernel = "radial"
-    ) %>%
-      c(dots) %>%
-      do.call(e1071::tune.svm, .)
+
+    if (!requireNamespace(backend)) {
+
+      fit <- list(
+        x = X,
+        y = as.factor(Y),
+        probability = TRUE,
+        kernel = "radial"
+      ) %>%
+        c(dots) %>%
+        do.call(e1071::tune.svm, .)
+    } else {
+      msg <- glue::glue(
+        "Package {backend} is required for backend = '{backend}'. \\
+        Please install it and then rerun."
+      )
+      stop(msg)
+    }
+
   } else if (backend == "liquidSVM") {
 
-    if (is.null(dots$type)) {
-      dots$type <- "AvA_ls"
+    if (requireNamespace(backend)) {
+
+      if (is.null(dots$type)) {
+        dots$type <- "AvA_ls"
+      }
+
+      if (is.null(dots$max_gamma)) {
+        dots$max_gamma <- 1e6
+      }
+
+      if (is.null(dots$min_gamma)) {
+        dots$min_gamma <- 1e-8
+      }
+
+      if (is.null(dots$min_lambda)) {
+        dots$min_lambda <- 1e-8
+      }
+
+      fit <- list(x = as.matrix(X),
+                  y = as.factor(Y),
+                  predict.prob = TRUE) %>%
+        c(dots) %>%
+        do.call(liquidSVM::mcSVM, .)
+
+    } else {
+      msg <- glue::glue(
+        "Package {backend} is required for backend = '{backend}'. \\
+        Please install it and then rerun."
+      )
+      stop(msg)
     }
-
-    if (is.null(dots$max_gamma)) {
-      dots$max_gamma <- 1e6
-    }
-
-    if (is.null(dots$min_gamma)) {
-      dots$min_gamma <- 1e-8
-    }
-
-    if (is.null(dots$min_lambda)) {
-      dots$min_lambda <- 1e-8
-    }
-
-    fit <- list(x = as.matrix(X),
-                y = as.factor(Y),
-                predict.prob = TRUE) %>%
-      c(dots) %>%
-      do.call(liquidSVM::mcSVM, .)
-
   }
+
   out <- list(
     X = X,
     Y = Y,

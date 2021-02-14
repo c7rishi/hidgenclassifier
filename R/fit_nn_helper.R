@@ -34,16 +34,19 @@ create_model <- function(learning_rate = 0.001,
                          seed = NULL,
                          input_shape,
                          num_classes) {
-  model <- keras_model_sequential()
+
+  stopifnot(requireNamespace("keras"))
+
+  model <- keras::keras_model_sequential()
 
   if (num_dense_layers == 0) {
 
     # output layer
     model %>%
-      layer_dense(
+      keras::layer_dense(
         units = num_classes,
         activation = "softmax",
-        kernel_initializer = initializer_glorot_uniform(seed),
+        kernel_initializer = keras::initializer_glorot_uniform(seed),
         input_shape = input_shape
       )
   } else {
@@ -52,43 +55,43 @@ create_model <- function(learning_rate = 0.001,
     for (i in 1:num_dense_layers) {
       if (i == 1) {
         model %>%
-          layer_dense(
+          keras::layer_dense(
             units = num_dense_nodes,
             activation = activation,
-            kernel_regularizer = regularizer_l2(weight_decay),
-            kernel_initializer = initializer_glorot_uniform(seed),
+            kernel_regularizer = keras::regularizer_l2(weight_decay),
+            kernel_initializer = keras::initializer_glorot_uniform(seed),
             input_shape = input_shape
           ) %>%
           # dropout
-          layer_dropout(rate = dropout, seed = seed)
+          keras::layer_dropout(rate = dropout, seed = seed)
       } else {
         model %>%
-          layer_dense(
+          keras::layer_dense(
             units = num_dense_nodes,
             activation = activation,
-            kernel_regularizer = regularizer_l2(weight_decay),
-            kernel_initializer = initializer_glorot_uniform(seed)
+            kernel_regularizer = keras::regularizer_l2(weight_decay),
+            kernel_initializer = keras::initializer_glorot_uniform(seed)
           ) %>%
           # dropout
-          layer_dropout(rate = dropout, seed = seed)
+          keras::layer_dropout(rate = dropout, seed = seed)
       }
     }
 
     # output layer
     model %>%
-      layer_dense(
+      keras::layer_dense(
         units = num_classes,
-        kernel_initializer = initializer_glorot_uniform(seed),
+        kernel_initializer = keras::initializer_glorot_uniform(seed),
         activation = "softmax"
       )
   }
 
   # optimizer
-  optimizer <- optimizer_adam(lr = learning_rate)
+  optimizer <- keras::optimizer_adam(lr = learning_rate)
 
   # compile model
   model %>%
-    compile(
+    keras::compile(
       loss = "categorical_crossentropy",
       optimizer = optimizer,
       metrics = "accuracy"
@@ -142,8 +145,10 @@ fitness <- function(X_train_norm,
     num_classes
   )
 
+  stopifnot(requireNamespace("keras"))
+
   # train model
-  history <- fit(
+  history <- keras::fit(
     model,
     X_train_norm,
     Y_train_onehot,
@@ -182,6 +187,13 @@ tune_model <- function(X_train_norm,
                        verbose_mbo = T,
                        seed = NULL,
                        batch_size = 128) {
+
+  reqd_pkgs <- c("ParamHelpers", "smoof", "mlrMBO", "mlrMBO", "lhs")
+
+  for (pkg in reqd_pkgs) {
+    stopifnot(requireNamespace(pkg))
+  }
+
 
   # hyperparameters to tune
   param_set <- ParamHelpers::makeParamSet(

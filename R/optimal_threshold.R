@@ -1,3 +1,10 @@
+# TODO: add an argument "Y" or "true_labels" to
+# calc_one_v_rest_auc so that these can be computed
+# without requiring a single fitted hidden genome model
+# as input (e.g., when predictions are obtained from
+# multiple models)
+
+
 #' Determine optimal one-vs-rest classification
 #' thresholds from fitted hidden genome models using
 #' prediction-based performance measures
@@ -22,9 +29,12 @@
 optimal_threshold <- function(fit,
                               measure = "fscore",
                               fitted_prob = NULL,
+                              true_labels = NULL,
                               ...) {
 
   meth <- fit$method
+
+  stopifnot(requireNamespace("precrec"))
 
   probs_pred_df <- create_pred_prob_df_from_fit(fit, fitted_prob)
 
@@ -33,6 +43,8 @@ optimal_threshold <- function(fit,
   }
 
   all_classes <- names(fit$alpha)
+
+  class <- NULL # so that R check doesn't complain
 
   thresh_res <- lapply(
     all_classes,
@@ -43,8 +55,8 @@ optimal_threshold <- function(fit,
       )[,
         class := this_class
       ][,
-        .(class, measure,
-          optimal_threshold, optimal_value)
+        list(class, measure,
+             optimal_threshold, optimal_value)
       ]
     }
   ) %>%
@@ -121,13 +133,20 @@ calc_one_v_rest_auc <- function(fit,
     stop('"measure" must either be "PRC" or "ROC" or both')
   }
 
+  stopifnot(requireNamespace("precrec"))
+
   probs_pred_df <- create_pred_prob_df_from_fit(fit, fitted_prob)
 
   if (attr(probs_pred_df, "msg") != "") {
     warning(attr(probs_pred_df, "msg"))
   }
 
-  all_classes <- names(fit$alpha)
+  all_classes <- probs_pred_df$canc %>%
+    as.character() %>%
+    unique() %>%
+    sort()
+
+  class <- PRC <- ROC <- NULL # so that R check doesn't complain
 
   out <- lapply(
     all_classes,
@@ -146,7 +165,7 @@ calc_one_v_rest_auc <- function(fit,
     do.call(rbind, .) %>%
     rbind(
       .[,
-        .(
+        list(
           class = "Macro (Average)",
           PRC = mean(PRC, na.rm = TRUE),
           ROC = mean(ROC)
@@ -172,6 +191,8 @@ create_pred_prob_df_from_fit <- function(fit, fitted_prob) {
   }
 
   resp_class <- colnames(probs_predicted_mat)
+
+  obs_canc <- dsid <- NULL # so that R check doesn't complain
 
   probs_pred_df <- probs_predicted_mat %>%
     data.matrix() %>%
@@ -256,14 +277,19 @@ create_pred_prob_matrix_from_fit <- function(fit) {
 
 
 get_mmdata_obj <- function(df, ...) {
+
+  stopifnot(requireNamespace("precrec"))
+
   unique_dsids <- unique(df$dsid) %>% sort()
+
+  dsid <-pid <- meth <- pred_prob <- NULL
 
   scores_list <- lapply(
     unique_dsids,
     function(this_dsid) {
 
       df[dsid == this_dsid,
-         .(pid, meth, pred_prob)] %>%
+         list(pid, meth, pred_prob)] %>%
         data.table::dcast(
           pid ~ meth,
           value.var = "pred_prob"
@@ -283,6 +309,7 @@ get_mmdata_obj <- function(df, ...) {
   n_meth <- length(scores_list[[1]])
   all_meth <- names(scores_list[[1]])
 
+  ndsid_meth <- NULL
   labels <- data.table::copy(df)[
     ,
     ndsid_meth := length(unique(dsid)),
@@ -327,10 +354,15 @@ indiv_one_v_rest_hard_comparison <- function(
   measure = c("fscore", "mcc"),
   ...) {
 
+
+  stopifnot(requireNamespace("precrec"))
+
   mmdata_obj <- get_mmdata_obj(df)
 
   performance <- mmdata_obj %>%
     precrec::evalmod(mode = "basic")
+
+  measure <- modname <- NULL
 
   out <- lapply(
     measure,
@@ -363,6 +395,10 @@ get_thresh_mmevalmod <- function(mmdata_obj,
                                  evalmod_obj,
                                  measure_name = "fscore") {
 
+  .SD <- data.table::.SD
+
+  modname <- x <- y <- NULL  # so that R check doesn't complain
+
   out <- autoplot(
     evalmod_obj,
     measure_name,
@@ -372,11 +408,13 @@ get_thresh_mmevalmod <- function(mmdata_obj,
     data.table::as.data.table() %>%
     # grouped filter
     .[, .SD[y == max(y, na.rm = TRUE)[1]], by = modname] %>%
-    .[, .(modname, x, y)] %>%
+    .[, list(modname, x, y)] %>%
     data.table::setnames(
       c("x", "y"),
       c("normalized_rank", measure_name)
     )
+
+  normalized_rank <- ranks <- scores <- NULL
 
   # associate threshold with normalized ranks
   score_rank_list <- mmdata_obj %>%
@@ -391,7 +429,7 @@ get_thresh_mmevalmod <- function(mmdata_obj,
             normalized_rank := (ranks - 1)/(length(ranks) -1)
           ] %>%
           data.table::setorder(normalized_rank) %>%
-          .[, .(normalized_rank, scores)] %>%
+          .[, list(normalized_rank, scores)] %>%
           unique()
       }
     ) %>%
@@ -426,7 +464,11 @@ get_thresh_mmevalmod <- function(mmdata_obj,
 
 indiv_one_v_rest_soft_comparison <- function(df,
                                              measure = c("PRC", "ROC")) {
+  stopifnot(requireNamespace("precrec"))
+
   mmdata_obj <- get_mmdata_obj(df)
+
+  modnames <- curvetypes <- NULL
 
   out <- mmdata_obj %>%
     precrec::evalmod(mode = "prcroc") %>%

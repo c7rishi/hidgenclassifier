@@ -30,6 +30,9 @@ extract_design_mdesign_mcts <- function(
     new = c("p", "v")
   )
 
+  .SD <- data.table::.SD
+  p <- v <-  NULL # so that CRAN check doesn't complain
+
   out <- dt[
     ,
     lapply(.SD, sum, na.rm = TRUE),

@@ -64,9 +64,16 @@ Object of class "nn", a named list of length 7 with the components of the neural
 This function first splits the data into a training and validation set and tunes hyperparameters using Bayesian optimization (similar to the approach used in Jiao et al. 2020), then uses the best hyperparameters to train a model on the entire dataset.
 }
 \note{
-The function uses packages {keras} and {tensorflow} for fitting neurual networks, which
+\enumerate{
+\item The function uses packages {keras} and {tensorflow} for fitting neurual networks, which
 requires a python environment in the backend. See the installation notes for
-the keras R package for more details.
+the {keras} R package for more details.
+\item In addition to {keras} and {tensorflow} the function makes use of
+several functions from packages
+{caret}, {mlrMBO}, {lhs}, {ParamHelpers}, {smoof}, and {mlr}
+under the hood. These packages must be installed separately before using
+fit_nnc.
+}
 }
 \examples{
 data("impact")
@@ -106,6 +113,7 @@ folds <- data.table::data.table(
 idx_train <- pid[folds != 5]
 idx_test <- pid[folds == 5]
 
+\dontrun{
 # train a classifier on the training set
 # using only variants (will have low accuracy
 # -- no meta-feature information used
@@ -121,6 +129,7 @@ pred0 <- predict_nnc(
   Xnew = var_design[idx_test, ]
 )
 
+}
 
 }
 \references{

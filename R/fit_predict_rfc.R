@@ -14,7 +14,8 @@ as.data.frame <- function(x) {
 #' "ranger" and "randomForest" corresponding to the respective R packages.
 #' NOTE: randomForest does not support sparseMatrix, and the predictor matrix
 #' is coerced into an ordinary matrix. This means using randomForest will likely
-#' be more memory intensive and hence slower than ranger.
+#' be more memory intensive and hence slower than ranger. NOTE: {ranger} and {randomForest}
+#' are required to be installed separately.
 #' @param ... additional arguments passed to ranger::ranger or randomForest::randomForest (depending  on backend).
 #' @param tune logical. Tune the random forest hyper parameters? Only used if
 #' backend = "ranger". Defaults to TRUE. If TRUE, a list of models are trained with
@@ -60,6 +61,8 @@ as.data.frame <- function(x) {
 #' idx_train <- pid[folds != 5]
 #' idx_test <- pid[folds == 5]
 #'
+#'
+#' \dontrun{
 #' # train a classifier on the training set
 #' # using only variants (will have low accuracy
 #' # -- no meta-feature information used)
@@ -73,6 +76,8 @@ as.data.frame <- function(x) {
 #'   fit = fit0,
 #'   Xnew = var_design[idx_test, ]
 #' )
+#' }
+#'
 #'
 #' @export
 fit_rfc <- function(
@@ -91,64 +96,87 @@ fit_rfc <- function(
   dots <- list(...)
 
   if (backend == "ranger") {
-    if (!tune) {
-      fit <- ranger::ranger(
-        x = X,
+
+    if (requireNamespace(backend)) {
+
+      if (!tune) {
+        fit <- ranger::ranger(
+          x = X,
+          y = as.factor(Y),
+          classification = TRUE,
+          probability = TRUE,
+          mtry = mtry,
+          num.trees = num.trees,
+          max.depth = max.depth[1],
+          ...
+        )
+      } else {
+
+        n_X <- ncol(X)
+        if (is.null(mtry)) {
+          mtry <- seq(
+            floor(n_X^0.3),
+            floor(n_X^0.7),
+            length.out = n_mtry
+          ) %>%
+            floor()
+        }
+
+        inparam_list <- expand.grid(
+          mtry = mtry,
+          max.depth = max.depth
+        )
+
+        fit_list <- mapply(
+          function(this_mtry, this_max.depth) {
+            ranger::ranger(
+              x = X,
+              y = as.factor(Y),
+              classification = TRUE,
+              probability = TRUE,
+              num.trees = num.trees,
+              mtry = this_mtry,
+              max.depth = this_max.depth,
+              ...
+            )
+          },
+          this_mtry = inparam_list$mtry,
+          this_max.depth = inparam_list$max.depth,
+          SIMPLIFY = FALSE
+        )
+
+        oob_error <- sapply(fit_list, "[[", "prediction.error")
+        fit <- fit_list[[which.min(oob_error)[1]]]
+
+      }
+    } else {
+      msg <- glue::glue(
+        "Package {backend} is required for backend = '{backend}'. \\
+        Please install it and then rerun."
+      )
+      stop(msg)
+    }
+  }
+
+  else if (backend == "randomForest") {
+
+    if (requireNamespace(backend)) {
+
+      fit <- randomForest::randomForest(
+        x = as.matrix(X),
         y = as.factor(Y),
-        classification = TRUE,
-        probability = TRUE,
-        mtry = mtry,
-        num.trees = num.trees,
-        max.depth = max.depth[1],
         ...
       )
     } else {
-
-      n_X <- ncol(X)
-      if (is.null(mtry)) {
-        mtry <- seq(
-          floor(n_X^0.3),
-          floor(n_X^0.7),
-          length.out = n_mtry
-        ) %>%
-          floor()
-      }
-
-      inparam_list <- expand.grid(
-        mtry = mtry,
-        max.depth = max.depth
+      msg <- glue::glue(
+        "Package {backend} is required for backend = '{backend}'. \\
+        Please install it and then rerun."
       )
-
-      fit_list <- mapply(
-        function(this_mtry, this_max.depth) {
-          ranger::ranger(
-            x = X,
-            y = as.factor(Y),
-            classification = TRUE,
-            probability = TRUE,
-            num.trees = num.trees,
-            mtry = this_mtry,
-            max.depth = this_max.depth,
-            ...
-          )
-        },
-        this_mtry = inparam_list$mtry,
-        this_max.depth = inparam_list$max.depth,
-        SIMPLIFY = FALSE
-      )
-
-      oob_error <- sapply(fit_list, "[[", "prediction.error")
-      fit <- fit_list[[which.min(oob_error)[1]]]
-
+      stop(msg)
     }
   }
-  else {
-    fit <- randomForest::randomForest(
-      x = as.matrix(X),
-      y = as.factor(Y),
-      ...
-    )
-  }
+
+
   out <- list(
     X = X,
     Y = Y,

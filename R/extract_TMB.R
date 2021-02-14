@@ -35,6 +35,9 @@ extract_tmb <- function(
     old = c(sample_id_col, variant_col),
     new = c("p", "v")
   )
+
+  p <- v <- nv <- NULL # so that CRAN doesn't complain
+
   setkey(dt, p)
 
   dt_tmb <- dt[

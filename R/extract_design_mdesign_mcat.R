@@ -50,11 +50,15 @@ extract_design_mdesign_mcat <- function(
     new = c("p", "v", "g")
   )
 
+  p <- v <- g <- NULL # so that CRAN check doesn't complain
+
   data.table::setkey(dt, p, g)
 
   if (is.null(mfeat_subset)) {
     mfeat_subset <- unique(dt$g)
   }
+
+  nv <- p1 <- g1 <- NULL
 
   g_p <- unique(
     dt[

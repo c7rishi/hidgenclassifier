@@ -96,6 +96,8 @@ screen_variant_mi <- function(
       c = unname(dots$cancer_cat)
     )
 
+    p <- c <- np <- vv <- v <- mi <- mi_rank <-  NULL
+
     # number of tumors per cancer site
     np_c <- dt_p_c[
       ,

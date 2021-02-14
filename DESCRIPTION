@@ -25,6 +25,16 @@ Imports:
     data.table,
     Matrix,
     glmnet,
+    ggplot2,
+    glue,
+    methods,
+    stats
+LinkingTo: 
+    Rcpp
+Suggests:
+    tidyverse,
+    knitr, 
+    rmarkdown,
     randomForest,
     ranger,
     e1071,
@@ -41,12 +51,5 @@ Imports:
     ParamHelpers,
     smoof,
     mlr,
-    ggplot2,
     precrec
-LinkingTo: 
-    Rcpp
-Suggests:
-    tidyverse,
-    knitr, 
-    rmarkdown
 VignetteBuilder: knitr

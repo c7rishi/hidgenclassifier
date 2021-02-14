@@ -5,9 +5,9 @@
 #' @importFrom Matrix Matrix crossprod tcrossprod t rowSums colSums rowMeans colMeans
 #' @import stats
 #' @import methods
-#' @import keras
+#' @importFrom utils capture.output head tail
 #' @importFrom ggplot2 autoplot
+#' @importFrom magrittr %>%
 ## usethis namespace: end
 NULL
 
-`%>%` <- magrittr::`%>%`

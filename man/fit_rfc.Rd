@@ -44,7 +44,8 @@ mutation profiles are listed across the rows of \code{X}.}
 "ranger" and "randomForest" corresponding to the respective R packages.
 NOTE: randomForest does not support sparseMatrix, and the predictor matrix
 is coerced into an ordinary matrix. This means using randomForest will likely
-be more memory intensive and hence slower than ranger.}
+be more memory intensive and hence slower than ranger. NOTE: {ranger} and {randomForest}
+are required to be installed separately.}
 
 \item{tune}{logical. Tune the random forest hyper parameters? Only used if
 backend = "ranger". Defaults to TRUE. If TRUE, a list of models are trained with
@@ -98,6 +99,8 @@ folds <- data.table::data.table(
 idx_train <- pid[folds != 5]
 idx_test <- pid[folds == 5]
 
+
+\dontrun{
 # train a classifier on the training set
 # using only variants (will have low accuracy
 # -- no meta-feature information used)
@@ -111,5 +114,7 @@ pred0 <- predict_rfc(
   fit = fit0,
   Xnew = var_design[idx_test, ]
 )
+}
+
 
 }

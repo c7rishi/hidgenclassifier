@@ -6,7 +6,13 @@
 thresholds from fitted hidden genome models using
 prediction-based performance measures}
 \usage{
-optimal_threshold(fit, measure = "fscore", fitted_prob = NULL, ...)
+optimal_threshold(
+  fit,
+  measure = "fscore",
+  fitted_prob = NULL,
+  true_labels = NULL,
+  ...
+)
 }
 \arguments{
 \item{fit}{fitted hidden genome classifier object}

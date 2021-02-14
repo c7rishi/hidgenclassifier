@@ -53,6 +53,9 @@ which is subsequently transposed and converted into a sparseMatrix object
 in the form of a n_patient x 96 design matrix
 }
 \note{
+The bioconductor packages {SomaticSignatures} and {VariantAnnotation} are not
+automatically installed with hidgenclassifier. Please install them separately.
+
 Using any {SomaticSignatures} function triggers the loading of
 {proxy} and {GGally} packages, which overwrites defaults S3 methods
 of a few functions from {ggplot2} and {registry}.

@@ -53,6 +53,8 @@ extract_design <- function(
     new = c("p", "vv")
   )
 
+  p <- vv <- p1 <- vv1 <- NULL # so that CRAN check doesn't complain
+
   setkey(dt, p, vv)
 
   if (is.null(variant_subset)) {

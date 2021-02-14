@@ -35,7 +35,7 @@ corresponding to specific mutation signatures etc.}
 mutation profiles are listed across the rows of \code{X}.}
 
 \item{backend}{the backend to use. Either "e1071" or "liquidSVM". Defaults to
-"liquidSVM"}
+"liquidSVM". NOTE: these packages are required to be installed separately.}
 
 \item{...}{additional arguments passed to e1071:tune.svm, or
 liquidSVM::svm.}
@@ -85,6 +85,7 @@ folds <- data.table::data.table(
 idx_train <- pid[folds != 5]
 idx_test <- pid[folds == 5]
 
+\dontrun{
 # train a classifier on the training set
 # using only variants (will have low accuracy
 # -- no meta-feature information used)
@@ -97,6 +98,6 @@ pred0 <- predict_svmc(
   fit = fit0,
   Xnew = var_design[idx_test, ]
 )
-
+}
 
 }
