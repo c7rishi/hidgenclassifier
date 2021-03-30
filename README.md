@@ -1,4 +1,4 @@
-# `hidgenclassifier`: An R package implementing methodologies described in  "Mining the Hidden Genome to Map Tumor Site of Origin""
+# `hidgenclassifier`: An R package implementing methodologies described in  "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty et al.
 
 ## Contents
 
@@ -10,7 +10,8 @@
 
 
 # Overview
-`hidgenclassifier` is an R package for Bayesian hierarchical hidden genome classification of cancer sites. It provides various pre-processing, fitting, and post-processing functions that collectively simplify handling of genomic datasets for use in the classifier, facilitate training of the hidden genome model,  compute predicted cancer type probabilities of new tumors based on trained models, and aid rigorous quantification of predictor effects (via odds ratios) in fitted models. 
+`hidgenclassifier` is an R package implementing Bayesian hierarchical hidden genome classifier for cancer sites developed in "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty, Martin, Guan, Begg and Shen (2021). It provides various pre-processing, fitting, and post-processing functions that collectively simplify handling of genomic datasets for use in the classifier, facilitate training of the hidden genome model,  compute predicted cancer type probabilities of new tumors based on trained models, and aid rigorous quantification of predictor effects (via odds ratios) in fitted models. The repository also includes an interactive html version of one of the figures (namely, Figure 1) displayed in the main manuscript.
+
 
 # Repo Contents
 
@@ -19,6 +20,7 @@
 - [man](./man): package manual for help in R session.
 - [src](./src): C++ source codes implementing various computation-heavy back-end functions. 
 - [vignettes](./vignettes): `R` vignettes for R session html help pages.
+- [figures](./figures): Interactive `.html` version of Figure 1 in the main manuscript.
 
 
 # System Requirements
@@ -96,3 +98,8 @@ After installation, a vignette illustrating an analysis of the publicly availabl
 vignette("impact_anlaysis", package = "hidgenclassifier")
 ```
 A rendered copy of the vignette from this repository can be found [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/vignettes/impact_anlaysis.html).
+
+
+# Interactive html Version of Figure 1 in the Article
+
+An interactive html version of Figure 1 in the article is included in this repository (inside [figures](./figures)). A rendered copy of the html figure is available [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/vignettes/impact_anlaysis.html).   
