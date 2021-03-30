@@ -1,0 +1,193 @@
+---
+title: "Classifying MSK-IMPACT tumors using Projected hidden genome multinomial logistic classifier"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Classifying MSK-IMPACT tumors using Projected hidden genome multinomial logistic classifier}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this vignette, we shall train a hidden genome (multinomial logistic) classifier on MSK-IMPACT tumors from 10 cancer sites.
+
+
+## Load packages and import data
+
+We start by setting a seed, loading the `hidgenclassifier` and `magrittr` packages (for its pipe operator), and importing the `impact` data from `hidgenclassifier`.
+
+```{r import}
+set.seed(42)
+library(magrittr)
+library(hidgenclassifier)
+data("impact")
+
+impact
+```
+
+```{r defn, include=FALSE}
+n_gene <- length(unique(impact$Hugo_Symbol))
+n_pid <- length(unique(impact$patient_id))
+```
+
+The impact mutation annotation dataset (stored as a data.table object)  consists of `r nrow(impact)` rows and `r ncol(impact)` columns and catalogs somatic mutations (column "Variant") detected at `r n_gene` targeted cancer genes  across `r n_pid` tumors from 10 cancer sites. The cancer sites are listed in the column "CANCER_SITE":
+```{r cancer_sites}
+unique(impact$CANCER_SITE)
+```
+
+We want to train a hidden genome (multinomial logistic) classifier on these 10 cancer sites (response classes) using the variants listed in columns "CANCER_SITE" as predictors, utilizing the meta-features gene (column "Hugo_Symbol") and 96 Single Base Substitution (SBS-96) categories. The sample/patient ids of tumors are listed in column "patient_id". Enter `?impact` in an R console to see more details on the dataset.
+
+
+## Training a hidden genome classifier
+
+### Pre-processing and computing the predictor matrix
+We first extract the response cancer classes, labeled by the patient (tumor) ids in the `impact` dataset, which we store in the variable `pid`.  
+```{r extract_cancer}
+canc_resp <- extract_cancer_response(
+  maf = impact,
+  cancer_col = "CANCER_SITE",
+  sample_id_col = "patient_id"
+)
+pid <- names(canc_resp)
+```
+To train the model, we first split the dataset into 5 stratified random folds, based the cancer categories. Then we combine 4 folds to get our training set, and use the remaining fifth fold as our test set.
+```{r train_test_pid}
+set.seed(42)
+folds <- data.table::data.table(
+  resp = canc_resp
+)[,
+  foldid := sample(rep(1:5, length.out = .N)),
+  by = resp
+]$foldid
+
+# 80%-20% stratified separation of training and
+# test set tumors
+pid_train <- pid[folds != 5]
+pid_test <- pid[folds == 5]
+```
+To fit a hidden genome classifier, we need to  (a) obtain the variant design matrix (X), (b) compute the meta-feature product design-meta-design matrices (XU), (c) column-bind these X and XU matrices, and normalizing each row of the resulting column-bound matrix by the square-root of the total mutation burden observed in that tumor (row). Note that because the XU matrix combines/condenses information from all variants (including less informative rare individual variants), given XU we can only keep the most informative/discriminative columns of X. That is, we can do a _feature screening_ of the columns of X before using it as predictors in the hidden genome model, after we have computed XU. 
+
+A mutual information (MI) based feature screening is implemented in the function `screen_variant_mi`, which we now use to get the most discriminative variants with MI rank $\leq$ 250 (stored in the variable `top_v` in the following). Note that the screening must be done on the _training set_, which is ensured by subsetting the impact data to rows corresponding to `patient_id %in% pid_train` while the maf file `impact` passing into `screen_variant_mi`:
+```{r screen_variant}
+top_v <- variant_screen_mi(
+  maf = impact[patient_id %in% pid_train],
+  variant_col = "Variant",
+  cancer_col = "CANCER_SITE",
+  sample_id_col = "patient_id",
+  mi_rank_thresh = 250,
+  return_prob_mi = FALSE,
+  do_freq_screen = FALSE
+)
+```
+Note that by default `do_freq_screen` is set to `FALSE`; if `do_freq_screen = TRUE`, then an overall (relative) frequency-based screening is performed _prior to_ MI based screening. This may reduce the computation load substantially for whole genome datasets where potentially tens of millions of variants, each with little individual discriminative information, are observed only once. The relative frequence threshold can be set by `thresh_freq_screen` (defaults to  1/n_sample where n_sample is the pan-cancer total number of tumors.) 
+
+With the most discriminative variants `top_v`  determined,  we now extract the variant design matrix X restricted to these variants for _all tumors_.  (The matrix will be row-subsetted to `pid_train` during training; the remaining rows will be used for prediction):
+```{r design_variant}
+X_variant <- extract_design(
+  maf = impact,
+  variant_col = "Variant",
+  sample_id_col = "patient_id",
+  variant_subset = top_v
+)
+dim(X_variant)
+```
+
+
+
+Next we compute the XU matrix (for all tumors) for the meta-feature gene. This can be obtained via the function `extract_design_mdesign_mcat`, by specifying the meta-feature column to be "Hugo_Symbol":
+```{r mdesign_gene}
+XU_gene <- extract_design_mdesign_mcat(
+  maf = impact,
+  variant_col = "Variant",
+  mfeat_col = "Hugo_Symbol",
+  sample_id_col = "patient_id",
+  mfeat_subset = NULL
+) %>% 
+  magrittr::set_colnames(
+    paste("Gene_", colnames(.))
+  )
+dim(XU_gene)
+```
+(the column names are appended by the prefix "Gene_" for easier identification of predictors in the fitted models). Note that by supplying an appropriate (non-`NULL`) `mfeat_subset`, the computation in `extract_design_mdesign_mcat` can be restricted to a specific subset of genes. This is useful when analyzing whole-exome and whole-genome datasets.
+
+
+Then we compute the XU matrix for the SBS-96 meta-feature. We use the function `extract_design_mdesign_sbs96`, by appropriately identifying various columns in the maf file (`impact`) that corresponds to various nucleotide change specific information on the detected variants.
+```{r mdesign_sbs96}
+XU_sbs96 <- extract_design_mdesign_sbs96(
+  maf = impact,
+  chromosome_col = "Chromosome",
+  start_position_col = "Start_Position",
+  end_position_col = "End_Position",
+  ref_col = "Reference_Allele",
+  alt_col = "Tumor_Seq_Allele2",
+  sample_id_col = "patient_id"
+) %>% 
+  magrittr::set_colnames(
+    paste("SBS_", colnames(.))
+  )
+dim(XU_sbs96)
+```
+(the column names are appended by the prefix "SBS_" for easier identification of predictors in the fitted models). Note that the function `extract_design_mdesign_sbs96` calls various functions from  `SomaticSignatures` and other bioconductor packages under the hood, which 
+uses various genomic datasets, and also overwrites a few default S3 methods. If overwriting of these functions (see the note above) is a concern, we recommend computing `XU_sbs96` in a non-interactive R session and saving the result as an R data object (using, say, `saveRDS`), or refreshing the R session after computing in an interactive R session.
+
+
+Finally, we compute the total mutation burden per tumor, labeled by tumor (patient) ids, using the function `extract_tmb`:
+```{r tmb}
+tmb <- extract_tmb(
+  maf = impact,
+  variant_col = "Variant",
+  sample_id_col = "patient_id"
+)
+```
+
+
+We are now in a position to create the predictor matrix for the hidden genome model, by column-binding all X and XU matrices, and then subsequently normalizing the rows of the column-bound matrix by the square-root of the total mutation burdens in the tumor; the resulting entries correspond to various scalar projections  as explained in the manuscript. We use the convenience function `divide_rows` for these normalizations within a `magrittr` pipe-d steps.
+```{r combine_pred}
+predictor_mat <- cbind(
+  X_variant[pid, ],
+  XU_gene[pid, ],
+  XU_sbs96[pid, ],
+  tmb = tmb[pid]
+) %>% 
+  divide_rows(sqrt(tmb[pid]))
+```
+(Note that the `tmb`  corresponds to the column of `XU` associated with an "intercept" meta-feature of all 1's.) The resulting `predictor_mat` will be used as the predictor matrix in the hidden genome model.
+
+
+### Fitting the mutlinomial logistic hidden genome classifier
+
+We use the function `fit_mlogit` to fit a hidden genome multinomial logistic classifier with `predictor_mat` as the predictor matrix, and `canc_resp` as the response cancer classes. The fitting is restricted to the training set tumors `pid_train`. This takes a while to compute, so we recommend running it, possibly in a non-interactive session, and saving the result into a file. 
+```{r fit, eval = FALSE}
+fit_impact <- fit_mlogit(
+  X = predictor_mat[pid_train, ],
+  Y = canc_resp[pid_train]
+)
+```
+
+
+## Predicting cancer sites based on a fitted hidden genome model
+
+To predict cancer sites based on a fitted hidden genome model, we simply use the function `predict_mlogit`:
+```{r predict, eval = FALSE}
+pred_impact <- predict_mlogit(
+  fit = fit_impact,
+  Xnew = predictor_mat[pid_test, ]
+)
+```
+This will create a list with entries (a) `probs_predicted`: a n_test_tumor by n_cancer matrix of multinomial probabilities, providing the predicted probability of each test set tumor being classified into each cancer site, and (b) `predicted` : a character vector listing hard classes based on the predicted multinomial probabilities (obtained by assigning tumors to the classes with highest predicted probabilities).
+
+
+## Understanding predictor effects via one-vs-rest odds ratios
+
+Rigorous quantification of individual predictor effects can be obtained through odds-ratios from a fitted multinomial logistic model. We consider  one-vs-rest odds ratio of a tumor being classified into a specific cancer category, relative to not being classified into that category, for one standard deviation change in each predictor from its mean, while keeping all other predictors fixed at their respective means. This is obtained using the function `odds_ratio_mlogit` 
+```{r odds_ratio, eval=FALSE}
+
+or <- odds_ratio_mlogit(
+  fit = fit_impact,
+  type = "one-vs-rest",
+  log = TRUE
+)
+```
+Note that odds ratios are computed by default in a log scale.
