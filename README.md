@@ -102,4 +102,4 @@ A rendered copy of the vignette from this repository can be found [here](https:/
 
 # Interactive html Version of Figure 1 in the Article
 
-An interactive html version of Figure 1 in the article is included in this repository (inside [figures](./figures)). A rendered copy of the html figure is available [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/figures/interactive-figure-1.html).  If the rendered images do not load fully, we recommend downloading the html file from  [figures](./figures)) and then opening the file in a web browser.
+An interactive html version of Figure 1 in the article is included in this repository (inside [figures](./figures)). A rendered copy of the html figure is available [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/figures/interactive-figure-1.html).  If the rendered images do not load fully, we recommend downloading the html file from  [figures](./figures) and then opening the file in a web browser.
