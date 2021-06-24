@@ -122,7 +122,8 @@ optimal_threshold <- function(fit,
 #'
 #' @return
 #' Returns a data.table with \code{length(measure) + 1} columns
-#' ("Class" and measure(s)) and n_class + 1 many rows, where n_class
+#' ("Class" and measure(s)) (\code{2 * length(measure) + 1} many columns if
+#' \code{include_baseline = TRUE}) and n_class + 1 many rows, where n_class
 #' denotes the number of cancer types present in the fitted model; the
 #' final row provides the Macro (average) metrics.
 #' @export
@@ -153,16 +154,18 @@ calc_one_v_rest_auc <- function(fit,
 
   class <- PRC <- ROC <- NULL # so that R check doesn't complain
 
+  all_measure <- c("PRC", "ROC")
+
   out <- lapply(
     all_classes,
     function(this_class) {
       indiv_one_v_rest_soft_comparison(
         probs_pred_df[canc == this_class],
-        measure = measure
+        measure = all_measure
       )[,
         class := this_class
       ][,
-        c("class", toupper(measure)),
+        c("class", toupper(all_measure)),
         with = FALSE
       ]
     }
@@ -185,7 +188,7 @@ calc_one_v_rest_auc <- function(fit,
     {./sum(.)} %>%
     c("Macro (Average)" = mean(.))
 
-  if (include_baseline & length(measure) == 2) {
+  if (include_baseline) {
     out[
       ,
       `:=`(
@@ -193,14 +196,17 @@ calc_one_v_rest_auc <- function(fit,
         ROC_baseline = 0.5
       )
     ]
-  } else if (include_baseline & measure == "PRC") {
-    attr(out, "baseline") <- prc_baseline
-  } else if (include_baseline & measure == "ROC") {
-    attr(out, "baseline") <- rep(0.5, length(all_classes) + 1) %>%
-      setNames(c(all_classes, "Macro (Average)"))
   }
 
-  out
+  final_colnames <- names(out) %>%
+    grep(
+      paste(measure, collapse = "|"), .,
+      ignore.case = TRUE, value = TRUE
+    ) %>%
+    {c("class", .)}
+
+
+  out[, final_colnames, with = FALSE]
 
 }
 
