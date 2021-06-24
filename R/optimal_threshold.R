@@ -178,8 +178,6 @@ calc_one_v_rest_auc <- function(fit,
       ]
     )
 
-  browser()
-
   prc_baseline <- fit$Y %>%
     unname() %>%
     table() %>%
