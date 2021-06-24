@@ -6,7 +6,13 @@
 Receiver-Operator characteristic curve (ROC) for all one-vs-rest
 comparisons in the fitted model}
 \usage{
-calc_one_v_rest_auc(fit, measure = c("PRC", "ROC"), fitted_prob = NULL, ...)
+calc_one_v_rest_auc(
+  fit,
+  measure = c("PRC", "ROC"),
+  fitted_prob = NULL,
+  include_baseline = TRUE,
+  ...
+)
 }
 \arguments{
 \item{fit}{fitted hidden genome classifier object}
@@ -23,6 +29,11 @@ be identical to the the tumor/sample names and cancer labels used in  the fitted
 (default) then the fitted probabilities are obtained from the model itself by either extracting pre-validated
 predictive probabilities (only available for mlogit models), or simply using the fitted model to
 make predictions on the training set.}
+
+\item{include_baseline}{logical. Along with the computed \emph{observed} value(s) of the measure(s)
+should the null baseline value(s) be returned. Here null baseline  refers to the expected
+value of the corresponding measure associated with a "baseline" classifier that (uniform) randomly assigns
+class labels to the sample units.}
 }
 \value{
 Returns a data.table with \code{length(measure) + 1} columns
