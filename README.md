@@ -1,4 +1,4 @@
-# `hidgenclassifier`: An R package implementing methodologies described in  "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty et al.
+# `hidgenclassifier`: An R package implementing methodologies described in  "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty et al. (*Nat Commun* **12,** 3051 (2021), [Link](https://www.nature.com/articles/s41467-021-23094-z))
 
 ## Contents
 
@@ -10,7 +10,7 @@
 
 
 # Overview
-`hidgenclassifier` is an R package implementing Bayesian hierarchical hidden genome classifier for cancer sites developed in "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty, Martin, Guan, Begg and Shen (2021). It provides various pre-processing, fitting, and post-processing functions that collectively simplify handling of genomic datasets for use in the classifier, facilitate training of the hidden genome model,  compute predicted cancer type probabilities of new tumors based on trained models, and aid rigorous quantification of predictor effects (via odds ratios) in fitted models. The repository also includes an interactive html version of one of the figures (namely, Figure 1) displayed in the main manuscript.
+`hidgenclassifier` is an R package implementing Bayesian hierarchical hidden genome classifier for cancer sites developed in "Mining Mutation Contexts across the Genome to Map Tumor Site of Origin" by Chakraborty, Martin, Guan, Begg and Shen (2021; [Link](https://www.nature.com/articles/s41467-021-23094-z)). It provides various pre-processing, fitting, and post-processing functions that collectively simplify handling of genomic datasets for use in the classifier, facilitate training of the hidden genome model,  compute predicted cancer type probabilities of new tumors based on trained models, and aid rigorous quantification of predictor effects (via odds ratios) in fitted models. The repository also includes a detailed vignette exemplifying the hidden genome classification methodology through the `hidgenclassifier` package (rendered [here](https://htmlpreview.github.io/?https://github.com/c7rishi/hidgenclassifier/blob/master/vignettes/impact_anlaysis.html)), and an interactive html version of one of the figures (namely, Figure 1) displayed in the main manuscript.
 
 
 # Repo Contents
@@ -88,7 +88,7 @@ devtools::install_github("c7rishi/hidgenclassifier", build_vignettes = TRUE)
 
 ## Typical install time
 
-`hidgenclassifier` depends on a number of R packages (both on CRAN and on Bioconductor), and installing them all from scratch on a Windows computer using binary packages take about 10 minutes. Install time on Linux where binary sources are not available can be substantially longer (~30 minutes). If the dependencies are all installed, `hidgenclassifier` takes about 1 minute to install. 
+`hidgenclassifier` suggests a number of R packages (both on CRAN and on Bioconductor) for full functionality, and installing them all from scratch on a Windows/Mac computer using binary packages can take about 10 minutes. Install times on Linux machines where binary sources are not available can be substantially longer (~30 minutes). Installing only `hidgenclassifier` without the suggested packages takes about 1 minute. 
 
 
 # Demo
