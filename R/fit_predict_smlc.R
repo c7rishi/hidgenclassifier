@@ -97,6 +97,7 @@ fit_smlc <- function(X,
                      Y,
                      grouped = TRUE,
                      alpha = 1,
+                     random_purturb = FALSE,
                      ...) {
   type.multinomial <- ifelse(grouped,
                              "grouped",
@@ -131,6 +132,20 @@ fit_smlc <- function(X,
 
   }
 
+  if (random_purturb) {
+    wt_data <- rexp(nrow(X))
+    wt_prior <- rexp(ncol(X))
+    dots$weights <- wt_data
+    dots$penalty.factor <- wt_prior
+    purturb_weights <- list(
+      data = wt_data,
+      prior = wt_prior
+    )
+  } else {
+    purturb_weights <- NULL
+  }
+
+
   logis <- do.call(
     glmnet::cv.glmnet,
     c(
@@ -159,7 +174,9 @@ fit_smlc <- function(X,
        Y = Y,
        fit = logis,
        method = "mlogit",
-       glmnet_keep = dots$keep)
+       glmnet_keep = dots$keep,
+       random_purturb = random_purturb,
+       )
 }
 
 #' @rdname fit_smlc
