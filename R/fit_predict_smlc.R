@@ -175,8 +175,8 @@ fit_smlc <- function(X,
        fit = logis,
        method = "mlogit",
        glmnet_keep = dots$keep,
-       random_purturb = random_purturb,
-       )
+       random_purturb = random_purturb
+  )
 }
 
 #' @rdname fit_smlc
