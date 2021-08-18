@@ -8,6 +8,7 @@
 #' @importFrom utils capture.output head tail
 #' @importFrom ggplot2 autoplot
 #' @importFrom magrittr %>%
+#' @importFrom Rcpp sourceCpp
 ## usethis namespace: end
 NULL
 
