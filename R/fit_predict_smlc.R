@@ -145,10 +145,11 @@ fit_smlc <- function(X,
       stop("'lambda' must be provided if random_purturb is set to TRUE")
     }
     lambda_orig <- dots$lambda
-    wt_lambda <- rexp(1)
+    wt_lambda <- 1 # rexp(1)
     wt_data <- rexp(nrow(X))
     wt_prior <- rexp(ncol(X))
-    dots$lambda <- lambda_orig * wt_lambda
+    lambda_final <- lambda_orig * wt_lambda
+    dots$lambda <- NULL # lambda_final
     dots$weights <- wt_data
     dots$penalty.factor <- wt_prior
     purturb_weights <- list(
@@ -159,7 +160,7 @@ fit_smlc <- function(X,
     dots$random_purturb <- NULL
   } else {
     purturb_weights <- NULL
-    lambda_orig <- dots$lambda
+    lambda_orig <- lambda_final <- dots$lambda
   }
 
   if (is.null(dots$cv)) {
@@ -188,7 +189,7 @@ fit_smlc <- function(X,
   )
 
 
-  tmp <- coef(logis)
+  tmp <- if (cv) coef(logis) else coef(logis, s = lambda_final)
 
   icept_idx <- ifelse(cv, "(Intercept)", 1)
   alpha_vec <- sapply(tmp, function(x) x[icept_idx, ])
