@@ -37,7 +37,8 @@ class labels to the sample units.}
 }
 \value{
 Returns a data.table with \code{length(measure) + 1} columns
-("Class" and measure(s)) and n_class + 1 many rows, where n_class
+("Class" and measure(s)) (\code{2 * length(measure) + 1} many columns if
+\code{include_baseline = TRUE}) and n_class + 1 many rows, where n_class
 denotes the number of cancer types present in the fitted model; the
 final row provides the Macro (average) metrics.
 }

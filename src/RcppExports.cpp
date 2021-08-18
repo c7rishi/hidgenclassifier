@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // Cpp_calc_minfo
 NumericVector Cpp_calc_minfo(NumericMatrix prob_mat, NumericVector wt_vec, int normalized);
 RcppExport SEXP _hidgenclassifier_Cpp_calc_minfo(SEXP prob_matSEXP, SEXP wt_vecSEXP, SEXP normalizedSEXP) {

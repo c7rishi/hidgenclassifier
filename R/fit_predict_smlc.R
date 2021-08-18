@@ -97,7 +97,7 @@ fit_smlc <- function(X,
                      Y,
                      grouped = TRUE,
                      alpha = 1,
-                     random_purturb = FALSE,
+                     # random_purturb = FALSE,
                      ...) {
   type.multinomial <- ifelse(grouped,
                              "grouped",
@@ -132,22 +132,49 @@ fit_smlc <- function(X,
 
   }
 
+  if (is.null(dots$random_purturb)) {
+    dots$random_purturb <- FALSE
+  }
+
+  random_purturb <- dots$random_purturb
+  stopifnot(is.logical(random_purturb))
+
+
   if (random_purturb) {
+    if (is.null(dots$lambda)) {
+      stop("'lambda' must be provided if random_purturb is set to TRUE")
+    }
+    lambda_orig <- dots$lambda
+    wt_lambda <- rexp(1)
     wt_data <- rexp(nrow(X))
     wt_prior <- rexp(ncol(X))
+    dots$lambda <- lambda_orig * wt_lambda
     dots$weights <- wt_data
     dots$penalty.factor <- wt_prior
     purturb_weights <- list(
       data = wt_data,
-      prior = wt_prior
+      prior = wt_prior,
+      lambda = wt_lambda
     )
+    dots$random_purturb <- NULL
   } else {
     purturb_weights <- NULL
+    lambda_orig <- dots$lambda
   }
 
+  if (is.null(dots$cv)) {
+    cv <- !random_purturb
+  } else {
+    cv <- dots$cv
+  }
+
+  stopifnot(is.logical(cv))
+  dots$cv <- NULL
+
+  glmnet_fn <- if (cv) glmnet::cv.glmnet else glmnet::glmnet
 
   logis <- do.call(
-    glmnet::cv.glmnet,
+    glmnet_fn,
     c(
       list(
         x = Matrix::Matrix(X, sparse = TRUE),
@@ -163,19 +190,26 @@ fit_smlc <- function(X,
 
   tmp <- coef(logis)
 
-  alpha_vec <- vapply(tmp, function(x) x["(Intercept)", ], 0)
-  beta_mat <- do.call(cbind,
-                      lapply(tmp, function(x) x[colnames(X), ]))
+  icept_idx <- ifelse(cv, "(Intercept)", 1)
+  alpha_vec <- sapply(tmp, function(x) x[icept_idx, ])
+
+  beta_mat <- do.call(
+    cbind,
+    lapply(tmp, function(x) x[colnames(X), ])
+  )
 
 
-  list(alpha = alpha_vec,
-       beta = beta_mat,
-       X = X,
-       Y = Y,
-       fit = logis,
-       method = "mlogit",
-       glmnet_keep = dots$keep,
-       random_purturb = random_purturb
+  list(
+    alpha = alpha_vec,
+    beta = beta_mat,
+    X = X,
+    Y = Y,
+    lambda = lambda_orig,
+    fit = logis,
+    method = "mlogit",
+    glmnet_keep = dots$keep,
+    random_purturb = random_purturb,
+    purturb_weights = purturb_weights
   )
 }
 
