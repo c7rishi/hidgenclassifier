@@ -23,6 +23,8 @@ mutation profiles are listed across the rows of \code{X}.}
 \item{grouped}{logical. Use group-lasso penalty instead of the ordinary lasso
 penalty? Defaults to TRUE.}
 
+\item{alpha}{The elasticnet mixing parameter. Passed to {cv.glmnet}}
+
 \item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \value{

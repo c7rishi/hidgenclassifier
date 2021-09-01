@@ -19,6 +19,7 @@ get_rand_foldid <- function(response, nfold = 10) {
 #' mutation profiles are listed across the rows of \code{X}.
 #' @param grouped logical. Use group-lasso penalty instead of the ordinary lasso
 #' penalty? Defaults to TRUE.
+#' @param alpha The elasticnet mixing parameter. Passed to {cv.glmnet}
 #' @param ... additional arguments passed to \code{cv.glmnet}.
 #'
 #' @note
@@ -97,7 +98,6 @@ fit_smlc <- function(X,
                      Y,
                      grouped = TRUE,
                      alpha = 1,
-                     # random_purturb = FALSE,
                      ...) {
   type.multinomial <- ifelse(grouped,
                              "grouped",
@@ -129,20 +129,31 @@ fit_smlc <- function(X,
         dots$trace.it <- FALSE
       }
     }
-
   }
 
-  if (is.null(dots$random_purturb)) {
-    dots$random_purturb <- FALSE
+  if (is.null(dots$random_perturb)) {
+    dots$random_perturb <- FALSE
   }
 
-  random_purturb <- dots$random_purturb
-  stopifnot(is.logical(random_purturb))
+  random_perturb <- dots$random_perturb
+  stopifnot(is.logical(random_perturb))
+
+  exact_coef_random_purturb <- FALSE
+
+  if (!is.null(dots$exact)) {
+    exact <- exact_coef_random_purturb <- dots$exact
+    stopifnot(
+      is.logical(exact),
+      length(exact) == 1
+    )
+    rm(exact)
+    dots$exact <- NULL
+  }
 
 
-  if (random_purturb) {
+  if (random_perturb) {
     if (is.null(dots$lambda)) {
-      stop("'lambda' must be provided if random_purturb is set to TRUE")
+      stop("'lambda' must be provided if random_perturb is set to TRUE")
     }
     lambda_orig <- dots$lambda
     wt_lambda <- 1 # rexp(1)
@@ -152,19 +163,19 @@ fit_smlc <- function(X,
     dots$lambda <- NULL # lambda_final
     dots$weights <- wt_data
     dots$penalty.factor <- wt_prior
-    purturb_weights <- list(
+    perturb_weights <- list(
       data = wt_data,
       prior = wt_prior,
       lambda = wt_lambda
     )
-    dots$random_purturb <- NULL
+    dots$random_perturb <- NULL
   } else {
-    purturb_weights <- NULL
+    perturb_weights <- NULL
     lambda_orig <- lambda_final <- dots$lambda
   }
 
   if (is.null(dots$cv)) {
-    cv <- !random_purturb
+    cv <- !random_perturb
   } else {
     cv <- dots$cv
   }
@@ -189,7 +200,19 @@ fit_smlc <- function(X,
   )
 
 
-  tmp <- if (cv) coef(logis) else coef(logis, s = lambda_final)
+  tmp <- if (cv) {
+    coef(logis)
+  } else  {
+    coef(
+      logis,
+      s = lambda_final,
+      exact = exact_coef_random_purturb,
+      x = Matrix::Matrix(X, sparse = TRUE),
+      y = Y,
+      weights = wt_data,
+      penalty.factor = wt_prior
+    )
+  }
 
   icept_idx <- ifelse(cv, "(Intercept)", 1)
   alpha_vec <- sapply(tmp, function(x) x[icept_idx, ])
@@ -209,8 +232,8 @@ fit_smlc <- function(X,
     fit = logis,
     method = "mlogit",
     glmnet_keep = dots$keep,
-    random_purturb = random_purturb,
-    purturb_weights = purturb_weights
+    random_perturb = random_perturb,
+    perturb_weights = perturb_weights
   )
 }
 
