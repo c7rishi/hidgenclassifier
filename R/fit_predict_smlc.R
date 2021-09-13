@@ -133,7 +133,7 @@ fit_smlc <- function(X,
 
 
   logis <- do.call(
-    glment::cv.glmnet,
+    glmnet::cv.glmnet,
     c(
       list(
         x = Matrix::Matrix(X, sparse = TRUE),

@@ -8,11 +8,11 @@ fit_perturbed_smlc <- function(fit,
   dots$alpha <- NULL
   dots$type.multinomial <- NULL
 
-  glment_alpha <- fit$glmnet_alpha
-  if (is.null(glment_alpha)) glmnet_alpha <- 1
+  glmnet_alpha <- fit$glmnet_alpha
+  if (is.null(glmnet_alpha)) glmnet_alpha <- 1
 
-  glment_type.multinomial <- fit$type.multinomial
-  if (is.null(glment_type.multinomial)) glmnet_type.multinomial <- "grouped"
+  glmnet_type.multinomial <- fit$type.multinomial
+  if (is.null(glmnet_type.multinomial)) glmnet_type.multinomial <- "grouped"
 
   stopifnot(
     lambda_type %in% c("lambda.min", "lambda.1se"),
@@ -131,7 +131,7 @@ calc_lpd_smlc <- function(fit,
                           glmnet_alpha,
                           glmnet_type.multinomial,
                           ...) {
-  glment_predict_prob <- predict(
+  glmnet_predict_prob <- predict(
     fit$fit,
     newx = Matrix::Matrix(fit$X, sparse = TRUE),
     type = "response"
@@ -141,7 +141,7 @@ calc_lpd_smlc <- function(fit,
   loglik <- sapply(
     1:N,
     function(ii) {
-      glment_predict_prob[ii, unname(fit$Y[ii])]
+      glmnet_predict_prob[ii, unname(fit$Y[ii])]
     }
   ) %>%
     log(.) %>%
