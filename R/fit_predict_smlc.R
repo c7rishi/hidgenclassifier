@@ -131,62 +131,9 @@ fit_smlc <- function(X,
     }
   }
 
-  if (is.null(dots$random_perturb)) {
-    dots$random_perturb <- FALSE
-  }
-
-  random_perturb <- dots$random_perturb
-  stopifnot(is.logical(random_perturb))
-
-  exact_coef_random_purturb <- FALSE
-
-  if (!is.null(dots$exact)) {
-    exact <- exact_coef_random_purturb <- dots$exact
-    stopifnot(
-      is.logical(exact),
-      length(exact) == 1
-    )
-    rm(exact)
-    dots$exact <- NULL
-  }
-
-
-  if (random_perturb) {
-    if (is.null(dots$lambda)) {
-      stop("'lambda' must be provided if random_perturb is set to TRUE")
-    }
-    lambda_orig <- dots$lambda
-    wt_lambda <- 1 # rexp(1)
-    wt_data <- rexp(nrow(X))
-    wt_prior <- rexp(ncol(X))
-    lambda_final <- lambda_orig * wt_lambda
-    dots$lambda <- NULL # lambda_final
-    dots$weights <- wt_data
-    dots$penalty.factor <- wt_prior
-    perturb_weights <- list(
-      data = wt_data,
-      prior = wt_prior,
-      lambda = wt_lambda
-    )
-    dots$random_perturb <- NULL
-  } else {
-    perturb_weights <- NULL
-    lambda_orig <- lambda_final <- dots$lambda
-  }
-
-  if (is.null(dots$cv)) {
-    cv <- !random_perturb
-  } else {
-    cv <- dots$cv
-  }
-
-  stopifnot(is.logical(cv))
-  dots$cv <- NULL
-
-  glmnet_fn <- if (cv) glmnet::cv.glmnet else glmnet::glmnet
 
   logis <- do.call(
-    glmnet_fn,
+    glment::cv.glmnet,
     c(
       list(
         x = Matrix::Matrix(X, sparse = TRUE),
@@ -200,41 +147,26 @@ fit_smlc <- function(X,
   )
 
 
-  tmp <- if (cv) {
-    coef(logis)
-  } else  {
-    coef(
-      logis,
-      s = lambda_final,
-      exact = exact_coef_random_purturb,
-      x = Matrix::Matrix(X, sparse = TRUE),
-      y = Y,
-      weights = wt_data,
-      penalty.factor = wt_prior
-    )
-  }
-
-  icept_idx <- ifelse(cv, "(Intercept)", 1)
+  tmp <- coef(logis)
+  icept_idx <- "(Intercept)"
   alpha_vec <- sapply(tmp, function(x) x[icept_idx, ])
 
   beta_mat <- do.call(
     cbind,
-    lapply(tmp, function(x) x[colnames(X), ])
+    lapply(tmp, function(xx) xx[colnames(X), ])
   )
 
 
-  list(
-    alpha = alpha_vec,
-    beta = beta_mat,
-    X = X,
-    Y = Y,
-    lambda = lambda_orig,
-    fit = logis,
-    method = "mlogit",
-    glmnet_keep = dots$keep,
-    random_perturb = random_perturb,
-    perturb_weights = perturb_weights
-  )
+  list(alpha = alpha_vec,
+       beta = beta_mat,
+       X = X,
+       Y = Y,
+       fit = logis,
+       method = "mlogit",
+       glmnet_keep = dots$keep,
+       glmnet_alpha = alpha,
+       glmnet_type.multinomial = type.multinomial)
+
 }
 
 #' @rdname fit_smlc
