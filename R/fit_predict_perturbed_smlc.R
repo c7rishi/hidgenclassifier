@@ -11,7 +11,7 @@ fit_perturbed_smlc <- function(fit,
   glmnet_alpha <- fit$glmnet_alpha
   if (is.null(glmnet_alpha)) glmnet_alpha <- 1
 
-  glmnet_type.multinomial <- fit$type.multinomial
+  glmnet_type.multinomial <- fit$glmnet_type.multinomial
   if (is.null(glmnet_type.multinomial)) glmnet_type.multinomial <- "grouped"
 
   stopifnot(
