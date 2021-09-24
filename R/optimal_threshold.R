@@ -25,6 +25,7 @@
 #' (along with the associated optimal measure values as an attribute)
 #'corresponding to that \code{measure}.
 #'
+#'
 #' @export
 optimal_threshold <- function(fit,
                               measure = "fscore",
@@ -126,6 +127,61 @@ optimal_threshold <- function(fit,
 #' \code{include_baseline = TRUE}) and n_class + 1 many rows, where n_class
 #' denotes the number of cancer types present in the fitted model; the
 #' final row provides the Macro (average) metrics.
+#'
+#' @note
+#'
+#' The function uses package {precrec} under the hood to compute the AUCs.
+#' Please install {precrec} before using calc_one_v_rest_auc.
+#'
+#' @examples
+#' data("impact")
+#' top_v <- variant_screen_mi(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id",
+#'   mi_rank_thresh = 50,
+#'   return_prob_mi = FALSE
+#' )
+#' var_design <- extract_design(
+#'   maf = impact,
+#'   variant_col = "Variant",
+#'   sample_id_col = "patient_id",
+#'   variant_subset = top_v
+#' )
+#'
+#' canc_resp <- extract_cancer_response(
+#'   maf = impact,
+#'   cancer_col = "CANCER_SITE",
+#'   sample_id_col = "patient_id"
+#' )
+#' pid <- names(canc_resp)
+#' # create five stratified random folds
+#' # based on the response cancer categories
+#' set.seed(42)
+#' folds <- data.table::data.table(
+#'   resp = canc_resp
+#' )[,
+#'   foldid := sample(rep(1:5, length.out = .N)),
+#'   by = resp
+#' ]$foldid
+#'
+#' # 80%-20% stratified separation of training and
+#' # test set tumors
+#' idx_train <- pid[folds != 5]
+#' idx_test <- pid[folds == 5]
+#'
+#' # train a classifier on the training set
+#' # using only variants (will have low accuracy
+#' # -- no meta-feature information used
+#' fit0 <- fit_mlogit(
+#'   X = var_design[idx_train, ],
+#'   Y = canc_resp[idx_train]
+#' )
+#'
+#' calc_one_v_rest_auc(fit0)
+#' calc_one_v_rest_auc(fit0, measure = "PRC")
+#' calc_one_v_rest_auc(fit0, measure = "ROC")
 #' @export
 calc_one_v_rest_auc <- function(fit,
                                 measure = c("PRC", "ROC"),
