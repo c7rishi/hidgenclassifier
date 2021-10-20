@@ -19,6 +19,20 @@ optimal_threshold(
 
 \item{measure}{prediction assessment measure. Options include "fscore",
 "mcc" (Mathews Correlation Coefficient). Can be a vector.}
+
+\item{fitted_prob}{an n_tumor x n_cancer matrix of predicted classification probabilities of
+(corresponding to the "true" class labels provided in \code{Ynew}, if supplied, or
+the original training Y labels, as stored in the trained model) to use for calculating ROC/PRC AUCs,
+where n_tumor denotes the number of tumor/sample units,
+and n_cancer is the number of cancer sites in the fitted hidden genome model (supplied
+through \code{"fit"}). Row names and column names must
+be identical to the the tumor/sample names and cancer labels in \code{Ynew} (if supplied) or
+as used in  the fitted model. If \code{NULL}
+(default) then the fitted probabilities are obtained from the model itself by
+either extracting pre-validated
+predictive probabilities (only available for mlogit models),
+or simply using the fitted model to
+make predictions on the training set.}
 }
 \value{
 If \code{length(measure) == 1} the function returns a named vector with optimal

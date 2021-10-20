@@ -8,6 +8,8 @@ comparisons in the fitted model}
 \usage{
 calc_one_v_rest_auc(
   fit,
+  Xnew = NULL,
+  Ynew = NULL,
   measure = c("PRC", "ROC"),
   fitted_prob = NULL,
   include_baseline = TRUE,
@@ -17,17 +19,28 @@ calc_one_v_rest_auc(
 \arguments{
 \item{fit}{fitted hidden genome classifier object}
 
+\item{Xnew, Ynew}{New predictor design matrix and corresponding cancer site labels. If provided,
+the trained hidden genome model (supplied through \code{fit}) is used to obtain
+predicted probabilities based on \code{Xnew} and the resulting resulting
+probabilities are used as \code{fitted_prob}, along with \code{Ynew} to
+calculate the AUCs. If \code{Xnew} is supplied, then \code{Ynew} must also
+be supplied. If \code{fitted_prob} is supplied, then \code{Xnew} is ignored.}
+
 \item{measure}{Type of curve to use. Options include "PRC" (Precision Recall Curve) and
 "ROC" (Receiver Operator characteristic Curve). Can be a vector.}
 
 \item{fitted_prob}{an n_tumor x n_cancer matrix of predicted classification probabilities of
-the \emph{training set tumors} to use for calculating ROC/PRC AUCs,
+(corresponding to the "true" class labels provided in \code{Ynew}, if supplied, or
+the original training Y labels, as stored in the trained model) to use for calculating ROC/PRC AUCs,
 where n_tumor denotes the number of tumor/sample units,
 and n_cancer is the number of cancer sites in the fitted hidden genome model (supplied
 through \code{"fit"}). Row names and column names must
-be identical to the the tumor/sample names and cancer labels used in  the fitted model. If \code{NULL}
-(default) then the fitted probabilities are obtained from the model itself by either extracting pre-validated
-predictive probabilities (only available for mlogit models), or simply using the fitted model to
+be identical to the the tumor/sample names and cancer labels in \code{Ynew} (if supplied) or
+as used in  the fitted model. If \code{NULL}
+(default) then the fitted probabilities are obtained from the model itself by
+either extracting pre-validated
+predictive probabilities (only available for mlogit models),
+or simply using the fitted model to
 make predictions on the training set.}
 
 \item{include_baseline}{logical. Along with the computed \emph{observed} value(s) of the measure(s)

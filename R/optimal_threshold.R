@@ -1,113 +1,32 @@
-# TODO: add an argument "Y" or "true_labels" to
-# calc_one_v_rest_auc so that these can be computed
-# without requiring a single fitted hidden genome model
-# as input (e.g., when predictions are obtained from
-# multiple models)
-
-
-#' Determine optimal one-vs-rest classification
-#' thresholds from fitted hidden genome models using
-#' prediction-based performance measures
-#'
-#' @param fit fitted hidden genome classifier object
-#' @param measure prediction assessment measure. Options include "fscore",
-#' "mcc" (Mathews Correlation Coefficient). Can be a vector.
-#'
-#' @return
-#' If \code{length(measure) == 1} the function returns a named vector with optimal
-#' one-vs-rest classification thresholds for all cancer
-#' classes in the fitted hidden genome object (fit). The optimal
-#' values obtained at the corresponding optimal thresholds are
-#' returned as an attribute "optimal_value".
-#'
-#' If \code{length(measure) > 1} a named list is returned, with each
-#' entry providing the optimal thresholds across all cancer categories
-#' (along with the associated optimal measure values as an attribute)
-#'corresponding to that \code{measure}.
-#'
-#'
-#' @export
-optimal_threshold <- function(fit,
-                              measure = "fscore",
-                              fitted_prob = NULL,
-                              true_labels = NULL,
-                              ...) {
-
-  meth <- fit$method
-
-  stopifnot(requireNamespace("precrec"))
-
-  probs_pred_df <- create_pred_prob_df_from_fit(fit, fitted_prob)
-
-  if (attr(probs_pred_df, "msg") != "") {
-    warning(attr(probs_pred_df, "msg"))
-  }
-
-  all_classes <- names(fit$alpha)
-
-  class <- NULL # so that R check doesn't complain
-
-  thresh_res <- lapply(
-    all_classes,
-    function(this_class) {
-      indiv_one_v_rest_hard_comparison(
-        probs_pred_df[canc == this_class],
-        measure = measure
-      )[,
-        class := this_class
-      ][,
-        list(class, measure,
-             optimal_threshold, optimal_value)
-      ]
-    }
-  ) %>%
-    do.call(rbind, .)
-
-  out <- sapply(
-    measure,
-    function(this_meas) {
-      tmp <- thresh_res[measure == this_meas]
-
-      out_thresh <- tmp$optimal_threshold %>%
-        setNames(tmp$class)
-      out_val <- tmp$optimal_value %>%
-        setNames(tmp$class)
-      attr(out_thresh, "optimal_value") <- out_val
-
-      out_thresh
-    },
-    USE.NAMES = TRUE,
-    simplify = FALSE
-  )
-
-  if (length(measure) == 1) {
-    out <- out[[1]]
-  }
-
-  out
-}
-
-
-
 #' Calculating area under Precision-Recall curve (PRC) and
 #' Receiver-Operator characteristic curve (ROC) for all one-vs-rest
 #' comparisons in the fitted model
-#' @inheritParams optimal_threshold
+#' @param fit fitted hidden genome classifier object
 #' @param measure Type of curve to use. Options include "PRC" (Precision Recall Curve) and
 #' "ROC" (Receiver Operator characteristic Curve). Can be a vector.
 #' @param fitted_prob  an n_tumor x n_cancer matrix of predicted classification probabilities of
-#' the *training set tumors* to use for calculating ROC/PRC AUCs,
+#' (corresponding to the "true" class labels provided in \code{Ynew}, if supplied, or
+#' the original training Y labels, as stored in the trained model) to use for calculating ROC/PRC AUCs,
 #' where n_tumor denotes the number of tumor/sample units,
 #' and n_cancer is the number of cancer sites in the fitted hidden genome model (supplied
 #' through \code{"fit"}). Row names and column names must
-#' be identical to the the tumor/sample names and cancer labels used in  the fitted model. If \code{NULL}
-#' (default) then the fitted probabilities are obtained from the model itself by either extracting pre-validated
-#' predictive probabilities (only available for mlogit models), or simply using the fitted model to
+#' be identical to the the tumor/sample names and cancer labels in \code{Ynew} (if supplied) or
+#' as used in  the fitted model. If \code{NULL}
+#' (default) then the fitted probabilities are obtained from the model itself by
+#' either extracting pre-validated
+#' predictive probabilities (only available for mlogit models),
+#' or simply using the fitted model to
 #' make predictions on the training set.
 #' @param include_baseline logical. Along with the computed *observed* value(s) of the measure(s)
 #'  should the null baseline value(s) be returned. Here null baseline  refers to the expected
 #'  value of the corresponding measure associated with a "baseline" classifier that (uniform) randomly assigns
 #'  class labels to the sample units.
+#' @param Xnew,Ynew New predictor design matrix and corresponding cancer site labels. If provided,
+#' the trained hidden genome model (supplied through \code{fit}) is used to obtain
+#' predicted probabilities based on \code{Xnew} and the resulting resulting
+#' probabilities are used as \code{fitted_prob}, along with \code{Ynew} to
+#' calculate the AUCs. If \code{Xnew} is supplied, then \code{Ynew} must also
+#' be supplied. If \code{fitted_prob} is supplied, then \code{Xnew} is ignored.
 #'
 #'
 #' @details
@@ -184,6 +103,8 @@ optimal_threshold <- function(fit,
 #' calc_one_v_rest_auc(fit0, measure = "ROC")
 #' @export
 calc_one_v_rest_auc <- function(fit,
+                                Xnew = NULL,
+                                Ynew = NULL,
                                 measure = c("PRC", "ROC"),
                                 fitted_prob = NULL,
                                 include_baseline = TRUE,
@@ -191,17 +112,39 @@ calc_one_v_rest_auc <- function(fit,
 
   meth <- fit$method
 
+  if (!is.null(Xnew) & is.null(Ynew)) {
+    # only one of Xnew and Ynew is null
+    msg <- paste(
+      "If Xnew is supplied then Ynew",
+      "must also be supplied"
+    )
+    stop(msg)
+  }
+
   if (any(!measure %in% c("PRC", "ROC"))) {
     stop('"measure" must either be "PRC" or "ROC" or both')
   }
 
-  stopifnot(requireNamespace("precrec"))
-
-  probs_pred_df <- create_pred_prob_df_from_fit(fit, fitted_prob)
-
-  if (attr(probs_pred_df, "msg") != "") {
-    warning(attr(probs_pred_df, "msg"))
+  if (!requireNamespace("precrec")) {
+    msg <- paste("package 'precrec' is needed for calculating AUCs")
+    stop(msg)
   }
+
+  probs_pred_df <- tryCatch(
+    create_pred_prob_df_from_fit(
+      fit,
+      fitted_prob,
+      Xnew,
+      Ynew
+    ),
+    error = function(e) e
+  )
+
+  if (is(probs_pred_df, "error")) {
+    msg <- probs_pred_df$message
+    stop(msg)
+  }
+
 
   all_classes <- probs_pred_df$canc %>%
     as.character() %>%
@@ -266,18 +209,161 @@ calc_one_v_rest_auc <- function(fit,
 
 }
 
-# processed prediction data table (to use in precrec)
-# using prediction probability matrix
-create_pred_prob_df_from_fit <- function(fit, fitted_prob) {
+
+#' Determine optimal one-vs-rest classification
+#' thresholds from fitted hidden genome models using
+#' prediction-based performance measures
+#' @inheritParams calc_one_v_rest_auc
+#' @param measure prediction assessment measure. Options include "fscore",
+#' "mcc" (Mathews Correlation Coefficient). Can be a vector.
+#'
+#' @return
+#' If \code{length(measure) == 1} the function returns a named vector with optimal
+#' one-vs-rest classification thresholds for all cancer
+#' classes in the fitted hidden genome object (fit). The optimal
+#' values obtained at the corresponding optimal thresholds are
+#' returned as an attribute "optimal_value".
+#'
+#' If \code{length(measure) > 1} a named list is returned, with each
+#' entry providing the optimal thresholds across all cancer categories
+#' (along with the associated optimal measure values as an attribute)
+#'corresponding to that \code{measure}.
+#'
+#'
+#' @export
+optimal_threshold <- function(fit,
+                              measure = "fscore",
+                              fitted_prob = NULL,
+                              true_labels = NULL,
+                              ...) {
 
   meth <- fit$method
 
-  if (is.null(fitted_prob)) {
-    probs_predicted_mat <- create_pred_prob_matrix_from_fit(fit)
-  } else {
+  stopifnot(requireNamespace("precrec"))
+
+  if (!is.null(Xnew) & is.null(Ynew)) {
+    # only one of Xnew and Ynew is null
+    msg <- paste(
+      "If Xnew is supplied then Ynew",
+      "must also be supplied"
+    )
+    stop(msg)
+  }
+
+  if (any(!measure %in% c("PRC", "ROC"))) {
+    stop('"measure" must either be "PRC" or "ROC" or both')
+  }
+
+  if (!requireNamespace("precrec")) {
+    msg <- paste("package 'precrec' is needed for calculating AUCs")
+    stop(msg)
+  }
+
+  probs_pred_df <- tryCatch(
+    create_pred_prob_df_from_fit(
+      fit,
+      fitted_prob,
+      Xnew,
+      Ynew
+    ),
+    error = function(e) e
+  )
+
+  all_classes <- names(fit$alpha)
+
+  class <- NULL # so that R check doesn't complain
+
+  thresh_res <- lapply(
+    all_classes,
+    function(this_class) {
+      indiv_one_v_rest_hard_comparison(
+        probs_pred_df[canc == this_class],
+        measure = measure
+      )[,
+        class := this_class
+      ][,
+        list(class, measure,
+             optimal_threshold, optimal_value)
+      ]
+    }
+  ) %>%
+    do.call(rbind, .)
+
+  out <- sapply(
+    measure,
+    function(this_meas) {
+      tmp <- thresh_res[measure == this_meas]
+
+      out_thresh <- tmp$optimal_threshold %>%
+        setNames(tmp$class)
+      out_val <- tmp$optimal_value %>%
+        setNames(tmp$class)
+      attr(out_thresh, "optimal_value") <- out_val
+
+      out_thresh
+    },
+    USE.NAMES = TRUE,
+    simplify = FALSE
+  )
+
+  if (length(measure) == 1) {
+    out <- out[[1]]
+  }
+
+  out
+}
+
+
+
+
+
+symm_diff <- function(x, y) {
+  union(
+    setdiff(x, y),
+    setdiff(y, x)
+  )
+}
+
+# processed prediction data table (to use in precrec)
+# using prediction probability matrix
+create_pred_prob_df_from_fit <- function(fit, fitted_prob, Xnew = NULL, Ynew = NULL) {
+
+  meth <- fit$method
+
+  if (!is.null(fitted_prob)) {
     probs_predicted_mat <- fitted_prob
-    # TODO: insert checks for fitted probabilities
-    attr(probs_predicted_mat, "msg") <- ""
+    Yvec <- if (!is.null(Ynew)) Ynew else fit$Y
+  } else if (!is.null(Xnew)) {
+    pred_fn <- match.fun(paste0("predict_", meth))
+    probs_predicted_mat <- pred_fn(fit, Xnew = Xnew)$probs_predicted
+    Yvec <- Ynew
+  } else {
+    probs_predicted_mat <- create_pred_prob_matrix_from_fit(fit)
+    Yvec <- fit$Y
+  }
+
+  if (length(Yvec) != nrow(probs_predicted_mat)) {
+    msg <- paste(
+      "row length of fitted probability matrix",
+      "and length of true cancer site vector differ"
+    )
+    stop(msg)
+  }
+
+
+  if (!is.null(names(Yvec)) & !is.null(rownames(probs_predicted_mat))) {
+    nm1 <- names(Yvec)
+    nm2 <- rownames(probs_predicted_mat)
+    if (length(symm_diff(nm1, nm2)) > 0) {
+      msg <- paste(
+        "rownames of fitted probability matrix",
+        "and names of true cancer site vector differ"
+      )
+      stop(msg)
+    }
+  } else {
+    names(Yvec) <- rownames(probs_predicted_mat) <-
+      paste0("patient_", 1:length(Yvec))
   }
 
   resp_class <- colnames(probs_predicted_mat)
@@ -290,7 +376,7 @@ create_pred_prob_df_from_fit <- function(fit, fitted_prob) {
     data.table::setnames("rn", "pid") %>%
     .[,
       `:=`(
-        obs_canc = fit$Y[rownames(probs_predicted_mat)],
+        obs_canc = Yvec[rownames(probs_predicted_mat)],
         dsid = 1,
         meth = meth
       )
