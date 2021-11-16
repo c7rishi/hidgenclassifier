@@ -112,6 +112,7 @@ calc_one_v_rest_auc <- function(fit,
 
   meth <- fit$method
 
+
   if (!is.null(Xnew) & is.null(Ynew)) {
     # only one of Xnew and Ynew is null
     msg <- paste(
@@ -407,7 +408,9 @@ create_pred_prob_matrix_from_fit <- function(fit) {
     cvf <- fit$fit
 
     probs_predicted <- cvf$fit.preval[, , cvf$lambda == cvf$lambda.1se] %>%
+      ifelse(is.na(.), 0, .) %>%
       apply(1, softmax) %>%
+      as.matrix() %>%
       t()
 
     msg <- ""
