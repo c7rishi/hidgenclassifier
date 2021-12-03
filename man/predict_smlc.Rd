@@ -6,9 +6,23 @@
 \title{Prediction based on the hidden genome sparse multinomial
 logistic classifier}
 \usage{
-predict_smlc(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
+predict_smlc(
+  fit,
+  Xnew,
+  Ynew = NULL,
+  return_lin_pred = FALSE,
+  normalize_rows = NULL,
+  ...
+)
 
-predict_mlogit(fit, Xnew, Ynew = NULL, return_lin_pred = FALSE, ...)
+predict_mlogit(
+  fit,
+  Xnew,
+  Ynew = NULL,
+  return_lin_pred = FALSE,
+  normalize_rows = NULL,
+  ...
+)
 }
 \arguments{
 \item{fit}{fitted hidden genome mlogit classifier, an output of fit_smlc.}
@@ -25,6 +39,11 @@ corresponding to specific mutation signatures etc.}
 \item{Ynew}{the actual cancer categories for the test samples.
 This is not used in computation, but is return as a component in the output,
 for possibly easier post-processing.}
+
+\item{normalize_rows}{vector of the same length as \code{nrow(X)} to be used
+to normalize the rows of \code{X}. If NULL (default), no normalization is performed.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \value{
 a list with entries (a) probs_predicted:

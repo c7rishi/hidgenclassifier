@@ -21,6 +21,9 @@ get_rand_foldid <- function(response, nfold = 10) {
 #' penalty? Defaults to TRUE.
 #' @param alpha The elasticnet mixing parameter. Passed to {cv.glmnet}
 #' @param ... additional arguments passed to \code{cv.glmnet}.
+#' @param normalize_rows vector of the same length as \code{nrow(X)} to be used
+#' to normalize the rows of \code{X}. If NULL (default), no normalization is performed.
+#'
 #'
 #' @note
 #' The function is a light wrapper around cv.glmnet with
@@ -98,10 +101,13 @@ fit_smlc <- function(X,
                      Y,
                      grouped = TRUE,
                      alpha = 1,
+                     normalize_rows = NULL,
                      ...) {
-  type.multinomial <- ifelse(grouped,
-                             "grouped",
-                             "ungrouped")
+  type.multinomial <- ifelse(
+    grouped,
+    "grouped",
+    "ungrouped"
+  )
   dots <- list(...)
   dots$alpha <- NULL
   dots$type.multinomial <- NULL
@@ -132,6 +138,10 @@ fit_smlc <- function(X,
   }
 
 
+  if (!is.null(normalize_rows)) {
+    X <- X %>% divide_rows(normalize_rows)
+  }
+
   logis <- do.call(
     glmnet::cv.glmnet,
     c(
@@ -157,15 +167,18 @@ fit_smlc <- function(X,
   )
 
 
-  list(alpha = alpha_vec,
-       beta = beta_mat,
-       X = X,
-       Y = Y,
-       fit = logis,
-       method = "mlogit",
-       glmnet_keep = dots$keep,
-       glmnet_alpha = alpha,
-       glmnet_type.multinomial = type.multinomial)
+  list(
+    alpha = alpha_vec,
+    beta = beta_mat,
+    X = X,
+    Y = Y,
+    fit = logis,
+    method = "mlogit",
+    glmnet_keep = dots$keep,
+    glmnet_alpha = alpha,
+    glmnet_type.multinomial = type.multinomial,
+    normalize_rows = normalize_rows
+  )
 
 }
 
@@ -213,6 +226,8 @@ adjust_Xnew <- function(Xnew, Xold_colnames) {
 #' This is not used in computation, but is return as a component in the output,
 #' for possibly easier post-processing.
 #'
+#' @inheritParams fit_mlogit
+#'
 #' @note  Predictors in \code{Xnew} that are not present in the
 #' training set design matrix (stored in \code{fit}) are dropped, and predictors
 #' not included in \code{Xnew} but present in training set design matrix are
@@ -242,10 +257,24 @@ predict_smlc <- function(fit,
                          Xnew,
                          Ynew = NULL,
                          return_lin_pred = FALSE,
+                         normalize_rows = NULL,
                          ...)  {
   fit_glmnet <- fit$fit
   beta <- fit$beta
   alpha <- fit$alpha
+
+  if (is.null(normalize_rows) & !is.null(fit$normalize_rows)) {
+    msg <- "'normalize_rows' supplied for training but not for prediction"
+    warning(msg)
+  } else if (!is.null(normalize_rows) & is.null(fit$normalize_rows)) {
+    msg <- "'normalize_rows' supplied for prediction but not for training"
+    warning(msg)
+  }
+
+  if (!is.null(normalize_rows)) {
+    Xnew <- Xnew %>% divide_rows(normalize_rows)
+  }
+
 
   Xnew_adj <- adjust_Xnew(Xnew, rownames(beta))
   n_new <- nrow(Xnew_adj)

@@ -41,6 +41,8 @@ the fitted model \code{fit} for which odds ratios are to be computed.}
 odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
 If NULL (default), the first response cancer category obtained after sorting the
 column labels (using \code{sort()}) is used.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \value{
 Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors

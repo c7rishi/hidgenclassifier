@@ -5,9 +5,9 @@
 \alias{fit_mlogit}
 \title{Hidden genome sparse multinomial logistic classifier (smlc)}
 \usage{
-fit_smlc(X, Y, grouped = TRUE, alpha = 1, ...)
+fit_smlc(X, Y, grouped = TRUE, alpha = 1, normalize_rows = NULL, ...)
 
-fit_mlogit(X, Y, grouped = TRUE, alpha = 1, ...)
+fit_mlogit(X, Y, grouped = TRUE, alpha = 1, normalize_rows = NULL, ...)
 }
 \arguments{
 \item{X}{data design matrix with observations across rows and predictors across
@@ -24,6 +24,9 @@ mutation profiles are listed across the rows of \code{X}.}
 penalty? Defaults to TRUE.}
 
 \item{alpha}{The elasticnet mixing parameter. Passed to {cv.glmnet}}
+
+\item{normalize_rows}{vector of the same length as \code{nrow(X)} to be used
+to normalize the rows of \code{X}. If NULL (default), no normalization is performed.}
 
 \item{...}{additional arguments passed to \code{cv.glmnet}.}
 }

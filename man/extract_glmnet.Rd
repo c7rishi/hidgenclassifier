@@ -8,6 +8,8 @@ extract_glmnet(fit, ...)
 }
 \arguments{
 \item{fit}{fitted hidden genome mlogit classifier, an output of fit_smlc.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \description{
 Extract the cv.glmnet object from the output of fit_mlogit

@@ -25,6 +25,8 @@ corresponding to specific mutation signatures etc.}
 \item{Ynew}{the actual cancer categories for the test samples.
 This is not used in computation, but is return as a component in the output,
 for possibly easier post-processing.}
+
+\item{...}{additional arguments passed to \code{cv.glmnet}.}
 }
 \description{
 prediction based on hidden genome random forest classifier
