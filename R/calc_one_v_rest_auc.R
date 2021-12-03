@@ -1,7 +1,7 @@
 #' Calculating area under Precision-Recall curve (PRC) and
 #' Receiver-Operator characteristic curve (ROC) for all one-vs-rest
 #' comparisons in the fitted model
-#' @param fit fitted hidden genome classifier object. Can be NULL, in which case
+#' @param fit fitted hidden genome classifier object. Experimental: can be NULL, in which case
 #'  `fitted_prob` and `Ynew` must be provided.
 #' @param measure Type of curve to use. Options include "PRC" (Precision Recall Curve) and
 #' "ROC" (Receiver Operator characteristic Curve). Can be a vector.
@@ -115,8 +115,7 @@ calc_one_v_rest_auc <- function(fit = NULL,
                                 include_baseline = TRUE,
                                 ...) {
 
-  meth <- fit$method
-
+  meth <- if (!is.null(fit)) fit$method else "unavailable"
 
   if (!is.null(Xnew) & is.null(Ynew)) {
     # only one of Xnew and Ynew is null
@@ -187,12 +186,14 @@ calc_one_v_rest_auc <- function(fit = NULL,
       ]
     )
 
-  prc_baseline <- fit$Y %>%
-    unname() %>%
-    table() %>%
-    c() %>%
-    {./sum(.)} %>%
-    c("Macro (Average)" = mean(.))
+  # prc_baseline <- fit$Y %>%
+  #   unname() %>%
+  #   table() %>%
+  #   c() %>%
+  #   {./sum(.)} %>%
+  #   c("Macro (Average)" = mean(.))
+  prc_baseline <- attr(probs_pred_df, "prc_baseline")
+
 
   if (include_baseline) {
     out[
@@ -244,7 +245,7 @@ optimal_threshold <- function(fit,
                               true_labels = NULL,
                               ...) {
 
-  meth <- fit$method
+  meth <- if (!is.null(fit)) fit$method else "unavailable"
 
   stopifnot(requireNamespace("precrec"))
 
@@ -340,12 +341,12 @@ create_pred_prob_df_from_fit <- function(fit = NULL,
                                          Ynew = NULL,
                                          normalize_rows = NULL) {
 
-  if (!is.null(fit)) meth <- fit$method
+  meth <- if (!is.null(fit)) fit$method else "unavailable"
 
   if (is.null(fit)) {
     if (is.null(Ynew) | is.null(fitted_prob)) {
       msg <- paste(
-        "If 'fit' is NULL, then both 'Ynew'",
+        "If 'fit' is NULL then both 'Ynew'",
         "and 'fitted_prob' must be supplied"
       )
       stop(msg)
@@ -421,6 +422,15 @@ create_pred_prob_df_from_fit <- function(fit = NULL,
 
   attr(probs_pred_df, "msg") <- attr(probs_predicted_mat, "msg")
 
+  prc_baseline <- Yvec %>%
+    unname() %>%
+    table() %>%
+    c() %>%
+    {./sum(.)} %>%
+    c("Macro (Average)" = mean(.))
+
+  attr(probs_pred_df, "prc_baseline") <- prc_baseline
+
   probs_pred_df
 }
 
@@ -430,7 +440,7 @@ create_pred_prob_df_from_fit <- function(fit = NULL,
 # prediction for other models)
 # for the training set individuals
 create_pred_prob_matrix_from_fit <- function(fit, normalize_rows = NULL) {
-  meth <- fit$method
+  meth <- if (!is.null(fit)) fit$method else "unavailable"
 
   if (meth == "mlogit" & !is.null(fit$fit$fit.preval)) {
     cvf <- fit$fit
