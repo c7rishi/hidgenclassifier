@@ -225,8 +225,8 @@ adjust_Xnew <- function(Xnew, Xold_colnames) {
 #' @param Ynew the actual cancer categories for the test samples.
 #' This is not used in computation, but is return as a component in the output,
 #' for possibly easier post-processing.
-#'
-#' @inheritParams fit_mlogit
+#' @param normalize_rows vector of the same length as \code{nrow(Xnew)} to be used
+#' to normalize the rows of \code{Xnew}. If NULL (default), no normalization is performed.
 #'
 #' @note  Predictors in \code{Xnew} that are not present in the
 #' training set design matrix (stored in \code{fit}) are dropped, and predictors

@@ -1,7 +1,8 @@
 #' Calculating area under Precision-Recall curve (PRC) and
 #' Receiver-Operator characteristic curve (ROC) for all one-vs-rest
 #' comparisons in the fitted model
-#' @param fit fitted hidden genome classifier object
+#' @param fit fitted hidden genome classifier object. Can be NULL, in which case
+#'  `fitted_prob` and `Ynew` must be provided.
 #' @param measure Type of curve to use. Options include "PRC" (Precision Recall Curve) and
 #' "ROC" (Receiver Operator characteristic Curve). Can be a vector.
 #' @param fitted_prob  an n_tumor x n_cancer matrix of predicted classification probabilities of
@@ -27,7 +28,7 @@
 #' probabilities are used as \code{fitted_prob}, along with \code{Ynew} to
 #' calculate the AUCs. If \code{Xnew} is supplied, then \code{Ynew} must also
 #' be supplied. If \code{fitted_prob} is supplied, then \code{Xnew} is ignored.
-#'
+#' @inheritParams predict_smlc
 #'
 #' @details
 #' Under the hood, the function uses several functions from R package \code{precrec}
@@ -101,10 +102,14 @@
 #' calc_one_v_rest_auc(fit0)
 #' calc_one_v_rest_auc(fit0, measure = "PRC")
 #' calc_one_v_rest_auc(fit0, measure = "ROC")
+#'
+#' @md
+#'
 #' @export
-calc_one_v_rest_auc <- function(fit,
+calc_one_v_rest_auc <- function(fit = NULL,
                                 Xnew = NULL,
                                 Ynew = NULL,
+                                normalize_rows = NULL,
                                 measure = c("PRC", "ROC"),
                                 fitted_prob = NULL,
                                 include_baseline = TRUE,
@@ -136,7 +141,8 @@ calc_one_v_rest_auc <- function(fit,
       fit,
       fitted_prob,
       Xnew,
-      Ynew
+      Ynew,
+      normalize_rows
     ),
     error = function(e) e
   )
@@ -262,10 +268,11 @@ optimal_threshold <- function(fit,
 
   probs_pred_df <- tryCatch(
     create_pred_prob_df_from_fit(
-      fit,
-      fitted_prob,
-      Xnew,
-      Ynew
+      fit = fit,
+      fitted_prob = fitted_prob,
+      Xnew = Xnew,
+      Ynew = Ynew,
+      normalize_rows = normalize_rows
     ),
     error = function(e) e
   )
@@ -327,19 +334,40 @@ symm_diff <- function(x, y) {
 
 # processed prediction data table (to use in precrec)
 # using prediction probability matrix
-create_pred_prob_df_from_fit <- function(fit, fitted_prob, Xnew = NULL, Ynew = NULL) {
+create_pred_prob_df_from_fit <- function(fit = NULL,
+                                         fitted_prob,
+                                         Xnew = NULL,
+                                         Ynew = NULL,
+                                         normalize_rows = NULL) {
 
-  meth <- fit$method
+  if (!is.null(fit)) meth <- fit$method
 
-  if (!is.null(fitted_prob)) {
+  if (is.null(fit)) {
+    if (is.null(Ynew) | is.null(fitted_prob)) {
+      msg <- paste(
+        "If 'fit' is NULL, then both 'Ynew'",
+        "and 'fitted_prob' must be supplied"
+      )
+      stop(msg)
+    }
+    probs_predicted_mat <- fitted_prob
+    Yvec <- Ynew
+  } else if (!is.null(fitted_prob)) {
     probs_predicted_mat <- fitted_prob
     Yvec <- if (!is.null(Ynew)) Ynew else fit$Y
   } else if (!is.null(Xnew)) {
     pred_fn <- match.fun(paste0("predict_", meth))
-    probs_predicted_mat <- pred_fn(fit, Xnew = Xnew)$probs_predicted
+    probs_predicted_mat <- pred_fn(
+      fit,
+      Xnew = Xnew,
+      normalize_rows = normalize_rows
+    )$probs_predicted
     Yvec <- Ynew
   } else {
-    probs_predicted_mat <- create_pred_prob_matrix_from_fit(fit)
+    probs_predicted_mat <- create_pred_prob_matrix_from_fit(
+      fit = fit,
+      normalize_rows = normalize_rows
+    )
     Yvec <- fit$Y
   }
 
@@ -401,7 +429,7 @@ create_pred_prob_df_from_fit <- function(fit, fitted_prob, Xnew = NULL, Ynew = N
 # (prevalidated for mlogit, and simple overoptimistic
 # prediction for other models)
 # for the training set individuals
-create_pred_prob_matrix_from_fit <- function(fit) {
+create_pred_prob_matrix_from_fit <- function(fit, normalize_rows = NULL) {
   meth <- fit$method
 
   if (meth == "mlogit" & !is.null(fit$fit$fit.preval)) {
@@ -419,7 +447,11 @@ create_pred_prob_matrix_from_fit <- function(fit) {
     Xnew <- fit$X
     pred_obj <- do.call(
       paste0("predict_", meth),
-      list(fit = fit, Xnew = Xnew)
+      list(
+        fit = fit,
+        Xnew = Xnew,
+        normalize_rows = normalize_rows
+      )
     )
     probs_predicted <- pred_obj$probs_predicted
 

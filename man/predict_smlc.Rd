@@ -40,10 +40,8 @@ corresponding to specific mutation signatures etc.}
 This is not used in computation, but is return as a component in the output,
 for possibly easier post-processing.}
 
-\item{normalize_rows}{vector of the same length as \code{nrow(X)} to be used
-to normalize the rows of \code{X}. If NULL (default), no normalization is performed.}
-
-\item{...}{additional arguments passed to \code{cv.glmnet}.}
+\item{normalize_rows}{vector of the same length as \code{nrow(Xnew)} to be used
+to normalize the rows of \code{Xnew}. If NULL (default), no normalization is performed.}
 }
 \value{
 a list with entries (a) probs_predicted:
