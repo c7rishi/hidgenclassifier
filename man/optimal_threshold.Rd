@@ -15,7 +15,7 @@ optimal_threshold(
 )
 }
 \arguments{
-\item{fit}{fitted hidden genome classifier object. Can be NULL, in which case
+\item{fit}{fitted hidden genome classifier object. Experimental: can be NULL, in which case
 \code{fitted_prob} and \code{Ynew} must be provided.}
 
 \item{measure}{prediction assessment measure. Options include "fscore",

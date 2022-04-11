@@ -18,7 +18,7 @@ calc_one_v_rest_auc(
 )
 }
 \arguments{
-\item{fit}{fitted hidden genome classifier object. Can be NULL, in which case
+\item{fit}{fitted hidden genome classifier object. Experimental: can be NULL, in which case
 \code{fitted_prob} and \code{Ynew} must be provided.}
 
 \item{Xnew, Ynew}{New predictor design matrix and corresponding cancer site labels. If provided,

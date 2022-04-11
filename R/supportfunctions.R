@@ -39,8 +39,36 @@ softmax <- function(x) {
   rs_x <- rowSums(exp_x)
   exp_out <- tcrossprod(rs_x, rep(1, nc)) - exp_x
   dimnames(exp_out) <- dimnames(exp_x)
-  log(exp_out)
+  out <- log(exp_out)
+  if (any(is.infinite(out), is.na(out))) {
+    # slow, but safe computation
+    out <- .log_exp_shift_sum_rest_cols_safe(x, shift)
+  }
+
+  out
 }
+
+
+.log_exp_shift_sum_rest_cols_safe <- function(x, shift) {
+  nc <- ncol(x)
+  out <- lapply(
+    1:nc,
+    function(ii) {
+      tmp_x <- x[, -ii, drop = FALSE]
+      row_maxs <- apply(tmp_x, 1, max)
+      exp_x_shift <- tmp_x %>%
+        {. - tcrossprod(row_maxs, rep(1, ncol(.)))} %>%
+        exp()
+      log(rowSums(exp_x_shift)) + row_maxs
+    }
+  ) %>%
+    do.call(cbind, .) %>%
+    {. - shift} %>%
+    `dimnames<-`(dimnames(x))
+
+  out
+}
+
 
 
 

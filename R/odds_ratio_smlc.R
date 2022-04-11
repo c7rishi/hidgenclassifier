@@ -27,7 +27,7 @@
 odds_ratio_mlogit <- function(
   fit,
   type = "one-vs-rest",
-  scale = TRUE,
+  scale = FALSE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
@@ -37,6 +37,16 @@ odds_ratio_mlogit <- function(
   if (is.null(predictor_subset)) {
     predictor_subset <- colnames(fit$X)
   }
+
+  if (scale) {
+    fit1 <- fit
+    fit$X <- scale(fit$X, center = FALSE)
+    X_sc <- attr(fit$X, "scaled:scale") %>%
+      {ifelse(. > 0, ., 1)}
+    fit$beta <- fit$beta %>%
+      divide_rows(1/c(X_sc[rownames(.)]))
+  }
+
 
   Xmat <- fit$X
   Xmat_scale <- scale(Xmat)
@@ -56,7 +66,8 @@ odds_ratio_mlogit <- function(
     d1 <- length(predictor_subset)
 
     x0 <- tcrossprod(rep(1, d), mu)
-    x1 <- x0 + diag(sigma, nrow = d)
+    x1 <- (x0) %>%
+      `diag<-`(diag(.) + sigma)
     dimnames(x0) <- dimnames(x1) <- list(names(mu), names(mu))
 
     x1 <- x1[predictor_subset, ]
@@ -92,7 +103,7 @@ odds_ratio_mlogit <- function(
         rep(1, d1),
         .
       )
-    dimnames(term4) <- dimnames(term4)
+    dimnames(term4) <- dimnames(term3)
 
     out <- x1beta - x0beta - term3 + term4
   }

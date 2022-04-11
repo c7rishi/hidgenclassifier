@@ -9,7 +9,7 @@ hidden genome model}
 odds_ratio_mlogit(
   fit,
   type = "one-vs-rest",
-  scale = TRUE,
+  scale = FALSE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
@@ -19,7 +19,7 @@ odds_ratio_mlogit(
 odds_ratio_smlc(
   fit,
   type = "one-vs-rest",
-  scale = TRUE,
+  scale = FALSE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
