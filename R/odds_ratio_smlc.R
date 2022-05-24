@@ -1,11 +1,16 @@
 #' Calculate odds ratios from a multinomial logistic
 #' hidden genome model
 #' @inheritParams predict_mlogit
-#' @param type either "one-vs-rest" or "one-vs-one".
-#' @param baseline_category The response category with respect to which
-#' odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
-#' If NULL (default), the first response cancer category obtained after sorting the
-#' column labels (using \code{sort()}) is used.
+#' @param type either "one-vs-rest" (default) or "one-vs-ave-baseline".
+#' @param baseline_category Vector of response categories with respect to whose
+#' *geometric average probability* are the generalized odds calculated.
+#' Ignored if `type = "one-vs-rest"`
+#' @param exclude_itself_from_baseline logical. If `type = "one-vs-ave-baseline"`
+#' should the response category category site whose odds is being calculated
+#' (e.g., category `B` in the numerator in the formula given in Details)
+#' be excluded from the categories specified
+#' in `baseline_category`? Defaults to TRUE. Ignored if `type = "one-vs-rest"` or
+#' `length(baseline_category) == 1`.
 #' @param log logical. Should the odds ratios be returned in log scale?
 #' Defaults to TRUE.
 #' @param predictor_subset Character vector listing the subset of predictors in
@@ -16,21 +21,29 @@
 #' if \code{scale = TRUE}) increase in each predictor at its mean, while keeping
 #' all other predictors fixed at their respective means.
 #'
-#' If \code{type = "one-vs-one"}, odds ratios relative to a baseline category
-#' is calculated. (Not implemented yet.)
+#' If \code{type = "one-vs-ave-baseline"}, ratio of generalized odds ratios
+#' relative to the *geometric average* of baseline category probabilities
+#' are computed. For example if `baseline_category = c("A1", .., "Ak")`
+#' then the generalized odds of response
+#' cancer site `B`is defined as $Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}$.
+#' odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
+#' If NULL (default), all the response cancer categories are used.
 #'
 #' @return
 #' Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors
 #' (along the rows) across cancer sites (along the columns).
 #'
+#' @md
+#'
 #' @export
 odds_ratio_mlogit <- function(
   fit,
-  type = "one-vs-rest",
-  scale = FALSE,
+  type = c("one-vs-rest", "one-vs-ave-baseline"),
+  scale_1sd = TRUE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
+  exclude_itself_from_baseline = TRUE,
   ...
 ) {
 
@@ -38,20 +51,10 @@ odds_ratio_mlogit <- function(
     predictor_subset <- colnames(fit$X)
   }
 
-  if (scale) {
-    fit1 <- fit
-    fit$X <- scale(fit$X, center = FALSE)
-    X_sc <- attr(fit$X, "scaled:scale") %>%
-      {ifelse(. > 0, ., 1)}
-    fit$beta <- fit$beta %>%
-      divide_rows(1/c(X_sc[rownames(.)]))
-  }
+  type <- match.arg(type)
 
 
-  Xmat <- fit$X
-  Xmat_scale <- scale(Xmat)
-
-  all_type <- c("one-vs-rest")
+  all_type <- c("one-vs-rest", "one-vs-ave-baseline")
 
   if (!type %in% all_type) {
     msg <- paste("'type' must be one of",
@@ -60,6 +63,9 @@ odds_ratio_mlogit <- function(
   }
 
   if (type == "one-vs-rest") {
+    Xmat <- fit$X
+    Xmat_scale <- scale(Xmat)
+
     mu <- attr(Xmat_scale, "scaled:center")
     sigma <- attr(Xmat_scale, "scaled:scale")
     d <- length(mu)
@@ -106,10 +112,55 @@ odds_ratio_mlogit <- function(
     dimnames(term4) <- dimnames(term3)
 
     out <- x1beta - x0beta - term3 + term4
+  } else if (type == "one-vs-ave-baseline") {
+
+    if (is.null(baseline_category)) {
+      baseline_category <- colnames(fit$beta)
+    }
+
+    all_cat <- colnames(fit$beta)
+
+    no_match_cat <- setdiff(baseline_category, all_cat)
+
+    if (length(no_match_cat) > 0) {
+      msg <- paste0("'", no_match_cat, "'") %>%
+        paste("baseline categories", .) %>%
+        paste("not found")
+      stop(msg)
+    }
+
+    stopifnot(length(baseline_category) > 0)
+
+    betamat <- fit$beta
+
+    if (scale_1sd) {
+      fit1 <- fit
+      fit$X <- scale(fit$X, center = FALSE)
+      X_sc <- attr(fit$X, "scaled:scale") %>%
+        {ifelse(. > 0, ., 1)}
+      betamat <- betamat %>%
+        divide_rows(1/c(X_sc[rownames(.)]))
+    }
+
+
+    exclude_itself <- exclude_itself_from_baseline &
+      length(baseline_category > 1)
+
+    out <- betamat
+    for (jj in all_cat) {
+      this_baseline <- baseline_category %>%
+        {if (exclude_itself) setdiff(., jj) else .}
+      out[, jj] <- out[, jj] - rowMeans(out[, this_baseline])
+    }
+
   }
+
+
   if (!log) {
     out <- exp(out)
   }
+
+  attr(out, "type") <- type
 
   out
 }

@@ -8,28 +8,30 @@ hidden genome model}
 \usage{
 odds_ratio_mlogit(
   fit,
-  type = "one-vs-rest",
-  scale = FALSE,
+  type = c("one-vs-rest", "one-vs-ave-baseline"),
+  scale_1sd = TRUE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
+  exclude_itself_from_baseline = TRUE,
   ...
 )
 
 odds_ratio_smlc(
   fit,
-  type = "one-vs-rest",
-  scale = FALSE,
+  type = c("one-vs-rest", "one-vs-ave-baseline"),
+  scale_1sd = TRUE,
   log = TRUE,
   predictor_subset = NULL,
   baseline_category = NULL,
+  exclude_itself_from_baseline = TRUE,
   ...
 )
 }
 \arguments{
 \item{fit}{fitted hidden genome mlogit classifier, an output of fit_smlc.}
 
-\item{type}{either "one-vs-rest" or "one-vs-one".}
+\item{type}{either "one-vs-rest" (default) or "one-vs-ave-baseline".}
 
 \item{log}{logical. Should the odds ratios be returned in log scale?
 Defaults to TRUE.}
@@ -37,10 +39,16 @@ Defaults to TRUE.}
 \item{predictor_subset}{Character vector listing the subset of predictors in
 the fitted model \code{fit} for which odds ratios are to be computed.}
 
-\item{baseline_category}{The response category with respect to which
-odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
-If NULL (default), the first response cancer category obtained after sorting the
-column labels (using \code{sort()}) is used.}
+\item{baseline_category}{Vector of response categories with respect to whose
+\emph{geometric average probability} are the generalized odds calculated.
+Ignored if \code{type = "one-vs-rest"}}
+
+\item{exclude_itself_from_baseline}{logical. If \code{type = "one-vs-ave-baseline"}
+should the response category category site whose odds is being calculated
+(e.g., category \code{B} in the numerator in the formula given in Details)
+be excluded from the categories specified
+in \code{baseline_category}? Defaults to TRUE. Ignored if \code{type = "one-vs-rest"} or
+\code{length(baseline_category) == 1}.}
 }
 \value{
 Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors
@@ -56,6 +64,11 @@ across all response categories, for one unit (one standard deviation unit,
 if \code{scale = TRUE}) increase in each predictor at its mean, while keeping
 all other predictors fixed at their respective means.
 
-If \code{type = "one-vs-one"}, odds ratios relative to a baseline category
-is calculated. (Not implemented yet.)
+If \code{type = "one-vs-ave-baseline"}, ratio of generalized odds ratios
+relative to the \emph{geometric average} of baseline category probabilities
+are computed. For example if \code{baseline_category = c("A1", .., "Ak")}
+then the generalized odds of response
+cancer site \code{B}is defined as $Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}$.
+odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
+If NULL (default), all the response cancer categories are used.
 }
