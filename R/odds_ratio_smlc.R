@@ -25,12 +25,11 @@
 #' relative to the *geometric average* of baseline category probabilities
 #' are computed. For example if `baseline_category = c("A1", .., "Ak")`
 #' then the generalized odds of response
-#' cancer site `B`is defined as $Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}$.
-#' odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
-#' If NULL (default), all the response cancer categories are used.
+#' cancer site `B`is defined as \eqn{Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}}.
+#'
 #'
 #' @return
-#' Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors
+#' Returns a matrix with odds ratios for predictors
 #' (along the rows) across cancer sites (along the columns).
 #'
 #' @md
@@ -144,13 +143,13 @@ odds_ratio_mlogit <- function(
 
 
     exclude_itself <- exclude_itself_from_baseline &
-      length(baseline_category > 1)
+      (length(baseline_category) > 1)
 
-    out <- betamat
+    out <- as.matrix(betamat)
     for (jj in all_cat) {
       this_baseline <- baseline_category %>%
         {if (exclude_itself) setdiff(., jj) else .}
-      out[, jj] <- out[, jj] - rowMeans(out[, this_baseline])
+      out[, jj] <- betamat[, jj] - rowMeans(betamat[, this_baseline, drop = FALSE])
     }
 
   }

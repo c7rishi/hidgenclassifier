@@ -51,7 +51,7 @@ in \code{baseline_category}? Defaults to TRUE. Ignored if \code{type = "one-vs-r
 \code{length(baseline_category) == 1}.}
 }
 \value{
-Returns a sparse matrix (of class dgeMatrix) with odds ratios for predictors
+Returns a matrix with odds ratios for predictors
 (along the rows) across cancer sites (along the columns).
 }
 \description{
@@ -68,7 +68,5 @@ If \code{type = "one-vs-ave-baseline"}, ratio of generalized odds ratios
 relative to the \emph{geometric average} of baseline category probabilities
 are computed. For example if \code{baseline_category = c("A1", .., "Ak")}
 then the generalized odds of response
-cancer site \code{B}is defined as $Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}$.
-odds ratios are calculated from the fitted model if \code{type = "one-vs-one"}.
-If NULL (default), all the response cancer categories are used.
+cancer site \code{B}is defined as \eqn{Pr(Site = B)/(\prod_{h=1}^k Pr(Site = Ak))^{1/k}}.
 }
