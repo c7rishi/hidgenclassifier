@@ -36,14 +36,14 @@
 #'
 #' @export
 odds_ratio_mlogit <- function(
-  fit,
-  type = c("one-vs-rest", "one-vs-ave-baseline"),
-  scale_1sd = TRUE,
-  log = TRUE,
-  predictor_subset = NULL,
-  baseline_category = NULL,
-  exclude_itself_from_baseline = TRUE,
-  ...
+    fit,
+    type = c("one-vs-rest", "one-vs-ave-baseline"),
+    scale_1sd = TRUE,
+    log = TRUE,
+    predictor_subset = NULL,
+    baseline_category = NULL,
+    exclude_itself_from_baseline = TRUE,
+    ...
 ) {
 
   if (is.null(predictor_subset)) {
@@ -60,6 +60,8 @@ odds_ratio_mlogit <- function(
                  paste(all_type, collapse = ", "))
     stop(msg)
   }
+
+  # browser()
 
   if (type == "one-vs-rest") {
     Xmat <- fit$X
@@ -98,16 +100,21 @@ odds_ratio_mlogit <- function(
 
     adj_const <- max(x1beta, x0beta)
 
-    term3 <- .log_exp_shift_sum_rest_cols(x1beta, shift = adj_const)
-    term4 <- .log_exp_shift_sum_rest_cols(
-      x0beta[1, , drop = FALSE],
-      shift = adj_const
-    ) %>%
+    term3 <- x1beta %>%
+      as.matrix() %>%
+      .log_exp_shift_sum_rest_cols(shift = adj_const)
+
+    term4 <- x0beta[1, , drop = FALSE] %>%
+      as.matrix() %>%
+      .log_exp_shift_sum_rest_cols(
+        shift = adj_const
+      ) %>%
       as.numeric() %>%
       tcrossprod(
         rep(1, d1),
         .
       )
+
     dimnames(term4) <- dimnames(term3)
 
     out <- x1beta - x0beta - term3 + term4
